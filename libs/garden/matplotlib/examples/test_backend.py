@@ -1,5 +1,5 @@
 import matplotlib
-matplotlib.use('module://kivy.garden.matplotlib.backend_kivy')
+matplotlib.use('module://kivy.matplotlib.backend_kivy')
 from matplotlib.figure import Figure
 from numpy import arange, sin, pi
 from kivy.app import App
