@@ -1,17 +1,36 @@
-from libs.garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
-import matplotlib.pyplot as plt
-
-plt.plot([1, 23, 2, 4])
-plt.ylabel('some numbers')
+from kivy.uix.button import Button
 
 
 class MyApp(App):
     def build(self):
-        box = BoxLayout()
-        box.add_widget(FigureCanvasKivyAgg(plt.gcf()))
-        return box
+        bl = BoxLayout(
+            orientation='horizontal',
+            padding=[50],
+            spacing=10)
+        bl.add_widget(
+            Button(text="0",
+                   font_size=16,
+                   on_press=self.btn_press,
+                   background_color=[1, 0, 0, 1],
+                   background_normal=''
+                   )
+        )
+
+        bl.add_widget(
+            Button(text="0",
+                   font_size=16,
+                   on_press=self.btn_press,
+                   background_color=[1, 0, 0, 1],
+                   background_normal=''
+                   ))
+
+        return bl
+
+    def btn_press(self, instance):
+        instance.text = str(eval(instance.text) + 1)
 
 
-MyApp().run()
+if __name__ == '__main__':
+    MyApp().run()
