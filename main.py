@@ -1,32 +1,30 @@
-from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
+from kivy.lang import Builder
+from kivymd.app import MDApp
+from kivymd.theming import ThemeManager
+from kivymd.uix.boxlayout import MDBoxLayout
+from numpy import *
+from kivymd.uix.tab import MDTabsBase, MDTabsBase
+from kivymd.uix.floatlayout import MDFloatLayout
+
+class Tab(MDFloatLayout, MDTabsBase):
+    '''Class implementing content for a tab.'''
+    content_text = ''
 
 
-class MyApp(App):
+class Container(MDBoxLayout):
+    pass
+
+
+class MyApp(MDApp):
+    theme_cls = ThemeManager()
+
     def build(self):
-        bl = BoxLayout(
-            orientation='horizontal',
-            padding=[50],
-            spacing=10)
-        bl.add_widget(
-            Button(text="0",
-                   font_size=16,
-                   on_press=self.btn_press,
-                   background_color=[1, 0, 0, 1],
-                   background_normal=''
-                   )
-        )
-
-        bl.add_widget(
-            Button(text="0",
-                   font_size=16,
-                   on_press=self.btn_press,
-                   background_color=[1, 0, 0, 1],
-                   background_normal=''
-                   ))
-
-        return bl
+        Builder.load_file('fig.kv')
+        self.theme_cls.theme_style = 'Amber'
+        self.theme_cls.material_style = "Amber"
+        self.theme_cls.primary_palette = "Amber"
+        self.theme_cls.accent_palette = "Red"
+        return Container()
 
     def btn_press(self, instance):
         instance.text = str(eval(instance.text) + 1)
