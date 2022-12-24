@@ -1,0 +1,65 @@
+
+
+<TooltipMDIconButton@MDIconButton+MDTooltip>
+<TooltipMDCheckbox@MDCheckbox+MDTooltip>
+<TooltipMDSlider@MDSlider+MDTooltip>
+
+#:import MDFlatButton kivymd.uix.button
+
+#:import MDBoxLayout kivymd.uix.boxlayout
+#:import MDFloatLayout kivymd.uix.floatlayout
+
+#:import MDRectangleFlatButton kivymd.uix.button
+#:import MDCard kivymd.uix.card
+#:import MDTabs kivymd.uix.tab
+#:import MDTabsBase kivymd.uix.tab
+
+#:set default_font_name 'TimesNewRomanRegular.ttf'
+<Tab>
+    MDLabel:
+        text: root.content_text
+        pos_hint: {"center_x": .5, "center_y": .5}
+
+<Container>:
+    orientation:'vertical'
+    size_hint:(1,1)
+    MDTabs:
+        size_hint_y:.3
+        size_hint_x: 1
+        padding:10
+        do_default_tab: False
+        Tab:
+            title: "Шаблоны"
+            MDCard:
+                MDFlatButton:
+                    style: 'elevated'
+                    line_color: (0.2, 0.2, 0.2, 0.1)
+                    size_hint_x:1
+                    size_hint_y:1
+                    text: '1'
+                    on_press:app.btn_press(self)
+        Tab:
+            title: "Рисование"
+
+        Tab:
+            title: "Вид"
+    MDBoxLayout:
+        padding: [10]
+        spacing: 5
+        orientation:'horizontal'
+        size_hint_y:.6
+        size_hint_x: 1
+        MDCard:
+            style: 'elevated'
+            line_color: (0.2, 0.2, 0.2, 0.1)
+            size_hint_y:1
+            size_hint_x:.7
+        MDCard:
+            style: 'elevated'
+            line_color: (0.2, 0.2, 0.2, 0.1)
+            size_hint_y:1
+            size_hint_x:.3
+
+
+
+
