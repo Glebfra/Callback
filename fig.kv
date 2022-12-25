@@ -4,61 +4,88 @@
 <TooltipMDCheckbox@MDCheckbox+MDTooltip>
 <TooltipMDSlider@MDSlider+MDTooltip>
 
-#:import MDFlatButton kivymd.uix.button
-
-#:import MDBoxLayout kivymd.uix.boxlayout
-#:import MDFloatLayout kivymd.uix.floatlayout
-
-#:import MDRectangleFlatButton kivymd.uix.button
-#:import MDCard kivymd.uix.card
-#:import MDTabs kivymd.uix.tab
-#:import MDTabsBase kivymd.uix.tab
-
 #:set default_font_name 'TimesNewRomanRegular.ttf'
-<Tab>
-    MDLabel:
-        text: root.content_text
-        pos_hint: {"center_x": .5, "center_y": .5}
+
+#:import images_path kivymd.images_path
 
 <Container>:
-    orientation:'vertical'
     size_hint:(1,1)
-    MDTabs:
-        size_hint_y:.3
-        size_hint_x: 1
-        padding:10
-        do_default_tab: False
-        Tab:
-            title: "Шаблоны"
-            MDCard:
-                MDFlatButton:
-                    style: 'elevated'
-                    line_color: (0.2, 0.2, 0.2, 0.1)
-                    size_hint_x:1
-                    size_hint_y:1
-                    text: '1'
-                    on_press:app.btn_press(self)
-        Tab:
-            title: "Рисование"
-
-        Tab:
-            title: "Вид"
     MDBoxLayout:
-        padding: [10]
-        spacing: 5
-        orientation:'horizontal'
-        size_hint_y:.6
+        size_hint_y: 1
         size_hint_x: 1
+        spacing:15
+        padding: 10
         MDCard:
             style: 'elevated'
-            line_color: (0.2, 0.2, 0.2, 0.1)
-            size_hint_y:1
-            size_hint_x:.7
-        MDCard:
-            style: 'elevated'
-            line_color: (0.2, 0.2, 0.2, 0.1)
-            size_hint_y:1
-            size_hint_x:.3
+            radius: 0
+            MDBoxLayout:
+                id: box_graph
+                size_hint_x:1
+                size_hint_y:1
+        MDBoxLayout:
+            id: plot
+            spacing: 5
+            orientation:'vertical'
+            size_hint_y: 1
+            size_hint_x: .25
+            size_hint_min_x:200
+
+            MDCard:
+                MDBoxLayout:
+                    orientation:'vertical'
+                    spacing:5
+                    anchor_x: 'center'
+                    anchor_y: 'center'
+                    radius: 0
+                    style: 'elevated'
+                    line_color:[.1,.1,.1,.1]
+                    size_hint_y:.7
+                    size_hint_x:1
+                    MDTextField:
+                        hint_text: "Rows:"
+                    MDTextField:
+                        hint_text: "Columns:"
+                    MDTextField:
+                        hint_text: "Refactory Time:"
+                    MDTextField:
+                        hint_text: "Excited Time:"
+                    MDTextField:
+                        hint_text: "Activator remain:"
+                    MDTextField:
+                        hint_text: "Excitation Threshold:"
+                    MDTextField:
+                        hint_text: "Time Between Steps:"
+            MDCard:
+                padding:10
+                radius: 0
+                style: 'elevated'
+                line_color:[.1,.1,.1,.1]
+                size_hint_min_y:50
+                size_hint_y:.15
+                size_hint_x:1
+                MDAnchorLayout:
+                    MDBoxLayout:
+                        padding:20
+                        orientation: 'horizontal'
+                        MDIconButton:
+                            size_hint_x:.5
+                            id: status
+                            icon: 'play'
+                            size_hint_y:1
+                            theme_icon_color: "Custom"
+                            icon_color: [.2, .8, .2, 1]
+                            icon_size : sp(50)
+                            on_release: app.btn_press(self)
+                        MDIconButton:
+                            size_hint_x:.5
+                            size_hint_y:1
+                            icon:'step-forward'
+                            theme_icon_color: "Custom"
+                            icon_color: [.2, .8, .2, 1]
+                            icon_size : sp(50)
+
+
+
 
 
 
