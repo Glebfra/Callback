@@ -1,15 +1,18 @@
+import numpy as np
 from kivy.lang import Builder
 from kivymd.app import MDApp
 from kivymd.theming import ThemeManager
 from kivymd.uix.boxlayout import MDBoxLayout
 from matplotlib import pyplot as plt
+from matplotlib import ticker
 
 from libs.garden.matplotlib import FigureCanvasKivyAgg
 
 fig = plt.figure()
 ax = fig.add_subplot()
-plt.xticks([])
-plt.yticks([])
+ax.set_xticks(np.linspace(0.5, 14.5, 15))
+ax.set_yticks(np.linspace(0.5, 14.5, 15))
+ax.v
 
 ax.grid('on')
 test = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -25,24 +28,30 @@ test = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 2, 0, 0, 0, 0, 1, 1, 0, 0, 2, 0, 0, 2, 0],
         [0, 2, 0, 0, 0, 0, 1, 0, 1, 0, 2, 2, 2, 2, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-ax = plt.imshow(cmap='binary',
-                X=test)
-collector = {'x': 0, 'y': 0}
+ax_in = plt.imshow(cmap='binary',
+                   X=test)
 
-
+kp = False
 def onclick(event):
-    global collector
-    try:
-        collector['x'] = event.xdata
-        collector['y'] = event.ydata
-        print(collector)
-    except:
-        pass
+    global kp
+    kp = True
+
+def release(event):
+    global kp
+    kp = False
+def motion(event):
+    global ax_in, fig, kp
+    if kp:
+        x = int(event.xdata + 1 / 2)
+        y = int(event.ydata + 1 / 2)
+        test[y][x] = 0
+        ax_in.set_data(test)
+        fig.canvas.draw_idle()
 
 
 fig.canvas.mpl_connect('button_press_event', onclick)
-
-
+fig.canvas.mpl_connect('button_release_event', release)
+fig.canvas.mpl_connect('motion_notify_event', motion)
 class Container(MDBoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
