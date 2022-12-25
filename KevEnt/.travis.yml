@@ -1,0 +1,17 @@
+language: python
+python:
+  - 3.5
+  - 3.6
+  - 3.7
+sudo: required
+dist: xenial
+before_install:
+  - sudo apt update
+  - sudo apt install -y build-essential ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev
+  - pip install -U pip
+  - pip install Cython
+  - pip install -r ./requirements.txt
+install:
+  - scripts/install_all.sh
+script:
+  - scripts/test_all.sh
