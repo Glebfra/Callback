@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <div align="center"><img src="images/kiventlogo.png" align="middle"></div>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <title>KivEnt</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>KivEnt</h1>
+        <h2>A Real-Time Rendering Framework for Kivy </h2>
+
+        <section id="downloads">
+          <a href="https://github.com/kivy/KivEnt/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/kivy/KivEnt/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/kivy/KivEnt" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+<p>
+  <h5>Chipmunk2d Provides Smooth, Multitouch Enabled Physics Interaction</h5>
+  <img src="images/interaction.gif" alt="Physics Interaction"> 
+</p>
+
+<h3><a name="gettingstarted" class="anchor" href="#gettingstarted"><span class="octicon octicon-link"></span></a>Getting Started</h3>
+<p>Read the <a href=https://github.com/kivy/KivEnt/wiki/An-Introduction-to-KivEnt>getting started tutorials</a></p>
+
+<h3><a name="documentation" class="anchor" href="#documentation"><span class="octicon octicon-link"></span></a>Documentation</h3>
+<p>Visit the <a href=http://kivent.org/docs/index.html>documentation</a></p>
+<h3>
+<h3><a name="versions" class="anchor" href="#versions"><span class="octicon octicon-link"></span></a>Supported Python Versions</h3>
+<p>Python2 and Python3</p>
+<h3><a name="versions" class="anchor" href="#versions"><span class="octicon octicon-link"></span></a>Supported Platforms</h3>
+<p>Tested on Linux (Ubuntu 14.04), Windows 10, OSX, and Android. Should work on iOS but untested.</p>
+
+<p>
+<h5>20,000 Sprites Being Rendered</h5>
+<img src="images/velocitymod.gif" alt="20000 Sprites">
+</p>
+
+
+<h3>
+<a name="introduction" class="anchor" href="#introduction"><span class="octicon octicon-link"></span></a>Introduction</h3>
+
+
+
+<p>KivEnt is a framework for building performant, dynamic real-time scenes in Kivy. While not as powerful as something like the Unreal engine or Unity3d, KivEnt is capable of creating games that handle several thousands to tens of thousands of entities, depending on what type of processing we are doing on them. You can easily have a hundreds thousand static sprites rendered in the background if they do not have any dynamic processing. At the same time, almost the entire API is accessible through Python, with a more performant cythonic API for those looking to get closer to the metal. Even without creating any cython gamesystems, you ought to be able to create games that feature up to several thousand game objects at once.</p>
+
+<p>
+  The only dependency for the kivent_core module is <a href="http://kivy.org">Kivy</a> itself. Additional modules may have other requirements, such as kivent_cymunk module being based on <a href="https://chipmunk-physics.net/">Chipmunk2d</a> and its <a href="https://github.com/tito/cymunk">cymunk</a> wrapper.</p>
+
+<p>An entity-component architecture is used to control game object state and the logic of processing the game objects. This means that your game objects will be made up of collections of independent components that stricly hold data; each component corresponds to a GameSystem that will perform all data processing on the components, in the update loop each frame, and as a result of user interaction or other programmaticaly generated events. All memory for 
+the built-in components is allocated statically: if you would like learn more
+about memory management, <a href="http://kivent.org/docs/memory_handlers.html">read here</a> </p>
+
+<p>KivEnt is built with a modular architecture and designed to have both a python api and a c-level cython api that allows more performant access to your game data. This makes it suitable for quickly prototyping a mechanic completely in python, and relatively trivial to then deeply cythonize that GameSystem if you find it to be performance sensitive. This process has already been done for the built-in components meaning they are ready for you to build new, performant game systems on top of them.</p>
+
+<p> The entire framework is made available to you with an MIT license so that you have the freedom to build whatever you want on top of it and monetize it however you like. </p>
+
+<p>The simulation below is created using this <a href="https://github.com/kivy/KivEnt/blob/master/examples/7_star_fade/main.py">pure python code.</a> It is still capable of handling updates on 5000 entities at nearly 60 fps, while creating and deleting entities in python at a rate of about 1250 per second.
+</p>
+<p>
+  <h5>5,000 Stars Being Rendered, with non-cythonized GameSystems</h5>
+  <img src="images/starfield.gif" alt="5000 Entities scripted from python"> 
+</p>
+<h3>
+<a name="news" class="anchor" href="#news"><span class="octicon octicon-link"></span></a>News</h3>
+
+__________________
+<p>KivEnt 2.2 was released on December 30, 2016. Major features include SVG support,
+OSX support, Tiled support, an expanded set of renderers for colored geometry, 
+and build in support for sounds and animations. To learn more about
+the release <a href="http://chaosbuffalogames.com/blog/kivent-22-released.html">read here.</a> KivEnt 2.2 represents 81 commits with 8,414 additions and 353 deletions; a huge thank you to all our
+developers!</p>
+___________________
+<p>KivEnt 2.1 was released on Augst 9, 2015. Major features include a module for 
+rendering vertex colored polygons, a new particle effects engine, and a more flexible
+and performant VertexModel class for storing your model data. To learn more about
+the release <a href="http://chaosbuffalogames.com/blog/kivent-21-and-particle-panda-2-released.html">read here.</a> KivEnt 2.1 represents 52 commits with 4,206 additions and 7,726 deletions; there has been a lot of cleanup!</p>
+
+<p>I have also built a new version of the Particle Panda app for use with the new 
+kivent_particles module. Find it on <a href="https://github.com/Kovak/ParticlePanda2">GitHub</a> 
+to build from source, or download the <a href="https://play.google.com/store/apps/details?id=org.chaosbuffalogames.particlepanda2">Android app</a> or <a href="http://www.kivent.org/files/ParticlePanda2.zip">Windows app</a></p>
+___________________
+<p>KivEnt 2.0 represents 344 commits by 6 contributors! A huge thank you to 
+  github users chozabu, tshirtman, mahomahomaho, squarrel, and inclement!</p>
+<p>
+  Compared to the KivEnt 1.0 release there has been 17,663 additions, 4,267 
+  deletions, we now have Windows support, performance has increased significantly,
+  the python api has been cut down and simplified, and the cython api has advanced 
+  significantly. It should be fairly easy to create new GameSystems benefiting
+  from the static memory optimizations, and much easier to write new renderers 
+  that make use of different shader formats.</p>
+
+<p>A little over a year ago KivEnt 1.0 was released and here are some examples 
+  of things created using the framework</p>
+<ul>
+    <li>The Boardz Alpha was released for android a few months ago: <a href="https://play.google.com/store/apps/details?id=org.chozabu.boardzfree&hl=en">free</a>, <a href="https://play.google.com/store/apps/details?id=org.chozabu.boardz&hl=en">ad-free</a>.</li>
+    <li>chozabu has also worked on a graphical editor for building levels 
+      <a href="https://github.com/chozabu/KivEntEd">github</a></li>
+</ul>
+
+<p>
+<h5>Interactive Mall Map with KivEnt</h5>
+<img src="images/mallmap.gif" alt="Rendering an Interactive Mall Map">
+</p>
+
+<h3><a name="mailinglist" class="anchor" href="#mailinglist"><span class="octicon octicon-link"></span></a>Mailing List</h3>
+<p>Visit the <a href=https://groups.google.com/forum/#!forum/kivent>google group</a></p>
+<h3>
+
+
+<h3>
+<a name="contact" class="anchor" href="#contact"><span class="octicon octicon-link"></span></a>Contact Info: </h3>
+<p>You can contact me at kovac1066@gmail.com or find me in Kivy's irc channel where I am kovak. On reddit, I'm JKovac.</p>
+
+<p>
+<h5>Several Thousand Sprites with Full Physics</h5>
+<img src="images/physics.gif" alt="Several Thousand sprites with 2d physics calculation">
+</p>  
+
+
+  </body>
+</html>
