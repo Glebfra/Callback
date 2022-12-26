@@ -1,10 +1,11 @@
 import numpy as np
 import numba
+import matplotlib.pyplot as plt
 
 
 class State(object):
-    def __init__(self, height: int = 200, width: int = 200, excitation_time: float = None,
-                 refractory_time: float = None, critical_value: float = None, activator_remain: float = None):
+    def __init__(self, height: int = 200, width: int = 200, excitation_time: float = 0.4,
+                 refractory_time: float = 0.2, critical_value: float = 2, activator_remain: float = 0.5):
         self.width, self.height = width, height
         self.states = np.zeros((width, height))
         self.__old_states = self.states
@@ -40,8 +41,18 @@ class State(object):
                     self.activator_production[row, col] = 0
 
                 self.activator_concentration[row, col] += self.activator_production[row-1:row+2, col-1:col+2].sum()
-        yield self.states
+        return self.states
 
 
 if __name__ == '__main__':
-    pass
+    state = State(height=10, width=10)
+    state.states[0, 0] = 1
+    plt.figure(1)
+    plt.ion()
+
+    for states in range(10):
+        plt.imshow(state.states)
+        plt.draw()
+        plt.pause(0.0001)
+        plt.clf()
+        state.states[states, 1] = 2
