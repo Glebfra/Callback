@@ -1,3 +1,0 @@
-Cython>=0.29.10
-Kivy>=1.11.1
-git+git://github.com/tito/cymunk

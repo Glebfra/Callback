@@ -1,9 +1,0 @@
-*.so
-*.o
-*.pyc
-.idea
-*.c
-*.pyd
-*.swp
-*.egg-info
-build
