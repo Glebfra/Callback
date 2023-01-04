@@ -15,13 +15,10 @@
     padding:[10]
     MDBoxLayout:
         size_hint:(.7,1)
-        MDCard:
-            style: 'elevated'
-            radius: 0
-            MDBoxLayout:
-                id: box_graph
-                size_hint_x:1
-                size_hint_y:1
+        Drawer:
+            id:Drawer
+            size: root.size
+
 
     MDBoxLayout:
         spacing:5
@@ -37,21 +34,21 @@
                 cols:3
                 MDIconButton:
                     text: '0'
-                    icon:'brush-variant'
+                    icon:'FrontEnd\\Icons\\calm.png'
                     theme_icon_color: "Custom"
                     icon_color: [.27, 0, .33, 1]
                     icon_size : sp(48)
                     on_press: app.bth_change_color(self)
                 MDIconButton:
                     text: '1'
-                    icon:'brush-variant'
+                    icon:'FrontEnd\\Icons\\chill.png'
                     theme_icon_color: "Custom"
                     icon_color: [.13, .56, .55, 1]
                     icon_size : sp(48)
                     on_press: app.bth_change_color(self)
                 MDIconButton:
                     text: '2'
-                    icon:'brush-variant'
+                    icon:'FrontEnd\\Icons\\angry.png'
                     theme_icon_color: "Custom"
                     icon_color: [.99, .91, .14, 1]
                     icon_size : sp(48)
@@ -62,6 +59,7 @@
             size_hint_x:1
             size_hint_y:.7
             MDBoxLayout:
+                padding:[10]
                 size_hint:(1,1)
                 orientation:'vertical'
                 radius: 0
@@ -73,20 +71,29 @@
                     orientation:'horizontal'
                     spacing:10
                     MDTextField:
+                        text: '20'
                         hint_text: "Rows:"
+                        mode: "rectangle"
                     MDTextField:
+                        text: '20'
                         hint_text: "Columns:"
+                        mode: "rectangle"
                 MDTextField:
                     hint_text: "Refactory Time:"
+                    mode: "rectangle"
                 MDTextField:
                     hint_text: "Excited Time:"
+                    mode: "rectangle"
                 MDTextField:
                     hint_text: "Activator remain:"
+                    mode: "rectangle"
                 MDTextField:
                     hint_text: "Excitation Threshold:"
+                    mode: "rectangle"
                 MDTextField:
                     size_hint_y:1/5
                     hint_text: "Time Between Steps:"
+                    mode: "rectangle"
         MDCard:
             radius: 0
             style: 'elevated'
