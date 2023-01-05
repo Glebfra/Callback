@@ -3,13 +3,13 @@ import typing
 
 import numpy as np
 
-import numba
 import matplotlib.pyplot as plt
 
 
 class State(object):
     def __init__(self, height: int = 30, width: int = 27, excitation_time: float = 3, refractory_time: float = 5,
-                 critical_value: float = 2.50, activator_remain: float = 0.55, states: typing.Iterable = None) -> None:
+                 critical_value: float = 2.50, activator_remain: float = 0.55, states: typing.Iterable = None,
+                 pacemakers: typing.Iterable = None) -> None:
         """
         This class contains the arrays
         :param height: The number of rows in arrays
@@ -22,7 +22,7 @@ class State(object):
         """
         self.width, self.height = width, height
         self.states = np.zeros((width, height)) if states is None else np.array(states)
-        self.__old_states = self.states
+        self.pacemakers = np.zeros((width, height)) if pacemakers is None else np.array(pacemakers)
         self.activator_concentration = np.zeros((width, height))
         self.activator_production = np.zeros((width, height))
         self.excitation_time = excitation_time
@@ -35,6 +35,22 @@ class State(object):
         with open(filepath, 'r') as file:
             properties = json.load(file)
         return cls(**properties)
+
+    def save_state_to_file(self, filepath):
+        properties = {
+            'height': self.height,
+            'width': self.width,
+            'refractory_time': self.refractory_time,
+            'excitation_time': self.excitation_time,
+            'activator_remain': self.activator_remain,
+            'critical_value': self.critical_value,
+            'states': self.states.tolist()
+        }
+        with open(filepath, 'w') as file:
+            json.dump(properties, file)
+
+    def create_pacemaker(self):
+        pass
 
     def reshape_states(self, height, width):
         # TODO make this method workable
@@ -51,7 +67,20 @@ class State(object):
         """
         for row in range(self.width):
             for col in range(self.height):
-                if 0 < self.states[row, col] < self.refractory_time + self.excitation_time:
+
+                if 0 < self.states[row, col] <= self.excitation_time:
+                    self.activator_production[row, col] = 1
+                elif self.excitation_time < self.states[row, col] <= self.excitation_time + self.refractory_time or \
+                        self.states[row, col] == 0:
+                    self.activator_production[row, col] = 0
+
+                self.activator_concentration[row, col] *= self.activator_remain
+                self.activator_concentration[row, col] += self.activator_production[
+                                                         row - 1 if row - 1 >= 0 else 0:row + 2,
+                                                         col - 1 if col - 1 >= 0 else 0:col + 2
+                                                         ].sum()
+
+                if 0 < self.states[row, col] < self.excitation_time + self.refractory_time:
                     self.states[row, col] += 1
                 elif self.states[row, col] == self.excitation_time + self.refractory_time:
                     self.states[row, col] = 0
@@ -60,22 +89,15 @@ class State(object):
                 elif self.states[row, col] == 0 and self.activator_concentration[row, col] >= self.critical_value:
                     self.states[row, col] = 1
 
-                if 0 < self.states[row, col] < self.excitation_time:
-                    self.activator_production[row, col] = 1
-                elif self.excitation_time < self.states[row, col] < self.excitation_time + self.refractory_time or self.states[row, col] == 0:
-                    self.activator_production[row, col] = 0
-
-                self.activator_concentration[row, col] += self.activator_production[row-1:row+2, col-1:col+2].sum()
         return self.states
 
 
 if __name__ == '__main__':
-    state = State.create_state_from_file('config/state1.json')
+    state = State.create_state_from_file('config/state4.json')
     plt.figure(1)
     plt.imshow(state.states)
     plt.ion()
-
-    for states in range(10):
+    while True:
         plt.imshow(state.states)
         plt.draw()
         plt.pause(0.0001)
