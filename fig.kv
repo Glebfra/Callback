@@ -17,9 +17,11 @@
 <MDInput@MDTextField>:
     input_type: 'number'
     mode: "rectangle"
-    helper_text_mode: "on_focus"
-
-
+    helper_text_mode: "on_error"
+    on_text_validate: app.TF_change(self)
+    required: True
+    helper_text: "incorrect input"
+    line_color_error: 1, 0, 0, 1
 
 <Container>:
     orientation:'horizontal'
@@ -28,6 +30,7 @@
     padding:[10]
 
     MDBoxLayout:
+
         size_hint:(.8,1)
         Drawer:
             id: Drawer
@@ -67,7 +70,7 @@
                         icon_color: [.13, .56, .55, 1]
                         icon_size : sp(48)
                     BrushPicker:
-                        text: '7'
+                        text: '2'
                         icon:'FrontEnd\\Icons\\angry.png'
                         icon_color: [.99, .91, .14, 1]
                 MDBoxLayout:
@@ -89,12 +92,13 @@
                         size_hint:(.2,.5)
                         icon:'alpha-p-box'
                     TooltipMDSlider:
+                        input_filter: 'int'
                         tooltip_text:'Pick the phase of placing cell'
                         size_hint:(.8,.5)
                         value:1
                         min:1
                         max:5
-
+                        on_value:app.resizeBrush(self)
         MDCard:
             padding: "4dp"
             orientation:'vertical'
@@ -110,12 +114,13 @@
             MDSeparator:
                 height: "1dp"
             MDScrollView:
+
                 do_scroll_x:False
                 padding:[20]
                 size_hint:(1,.9)
                 MDBoxLayout:
                     adaptive_height:True
-                    spacing:10
+                    spacing:20
                     padding:[5,65,5,5]
                     orientation:'vertical'
                     radius: 0
@@ -128,24 +133,21 @@
                             input_filter: 'int'
                             id: row
                             hint_text: "Rows:"
-                            on_text_validate: app.TF_changeWidth(self)
                         MDInput:
                             input_filter: 'int'
                             id: column
                             hint_text: "Columns:"
-                            on_text_validate: app.TF_changeHeight(self)
                     MDInput:
                         input_filter: 'int'
                         id: refractory_time
                         hint_text: "Refactory Time:"
                         helper_text: "Test"
-                        on_text_validate: app.TF_change_refactory_time(self)
                     MDInput:
+                        input_filter: 'int'
                         id: excitation_time
                         hint_text: "Excitation Time:"
                     MDInput:
                         input_filter: 'float'
-
                         id: activator_remain
                         hint_text: "Activator remain:"
                     MDInput:
@@ -155,7 +157,7 @@
                     MDInput:
                         input_filter: 'float'
                         id: time_between_steps
-                        hint_text: "Time Between Steps:"
+                        hint_text: "Time Between Steps(ms):"
         MDCard:
             radius: 0
             style: 'elevated'

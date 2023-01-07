@@ -1,5 +1,6 @@
 
 from kivy.uix.widget import Widget
+from kivy.graphics.instructions import Image
 
 
 class Drawer(Widget):
@@ -9,6 +10,11 @@ class Drawer(Widget):
         self.figures = None
 
         # Maps
+        self.textureMap = {0: Image('FrontEnd\\Icons\\calm.png').texture,
+                           1: Image('FrontEnd\\Icons\\chill.png').texture,
+                           2: Image('FrontEnd\\Icons\\angry.png').texture}
+
+
         self.iconMap = {0: 'FrontEnd\\Icons\\calm.png',
                         1: 'FrontEnd\\Icons\\chill.png',
                         2: 'FrontEnd\\Icons\\angry.png'}
