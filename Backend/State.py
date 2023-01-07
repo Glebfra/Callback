@@ -2,13 +2,14 @@ import json
 import typing
 
 import numpy as np
+import numba
 
 import matplotlib.pyplot as plt
 
 
 class State(object):
     def __init__(self, height: int = 30, width: int = 27, excitation_time: float = 3, refractory_time: float = 5,
-                 critical_value: float = 2.50, activator_remain: float = 0.55, states: typing.Iterable = None,
+                 critical_value: float = 3, activator_remain: float = 0.3, states: typing.Iterable = None,
                  pacemakers: typing.Iterable = None) -> None:
         """
         This class contains the arrays
@@ -47,6 +48,31 @@ class State(object):
                     states_array[row, col] = 2
         return states_array
 
+    def resize_states(self, width, height):
+        self.width, self.height = width, height
+
+        old_states: np.ndarray = self._states.copy()
+        old_activator_production: np.ndarray = self.activator_production.copy()
+        old_activator_concentration: np.ndarray = self.activator_concentration.copy()
+
+        new_states: np.ndarray = np.zeros((width, height))
+        new_activator_production: np.ndarray = np.zeros((width, height))
+        new_activator_concentration: np.ndarray = np.zeros((width, height))
+
+        for row in range(old_states.shape[0]):
+            if row >= new_states.shape[0]:
+                break
+            for col in range(old_states.shape[1]):
+                if col >= new_states.shape[1]:
+                    break
+                new_states[row, col] = old_states[row, col]
+                new_activator_production[row, col] = old_activator_production[row, col]
+                new_activator_concentration[row, col] = old_activator_concentration[row, col]
+
+        self._states = new_states
+        self.activator_production = new_activator_production
+        self.activator_concentration = new_activator_concentration
+
     @states.setter
     def states(self, states):
         self._states = states
@@ -67,48 +93,58 @@ class State(object):
     def create_pacemaker(self):
         pass
 
-    def reshape_states(self, height, width):
-        # TODO make this method workable
-        self.height = height
-        self.width = width
-        self._states.reshape((width, height))
-        self.activator_production.reshape((width, height))
-        self.activator_concentration.reshape((width, height))
+    @staticmethod
+    @numba.njit
+    def __next_step(states: np.ndarray, activator_production: np.ndarray, activator_concentration: np.ndarray,
+                    width: int, height: int, excitation_time: float, refractory_time: float, activator_remain: float,
+                    critical_value: float):
+        for row in range(width):
+            for col in range(height):
+
+                if 0 < states[row, col] <= excitation_time:
+                    activator_production[row, col] = 1
+                elif excitation_time < states[row, col] <= excitation_time + refractory_time or \
+                        states[row, col] == 0:
+                    activator_production[row, col] = 0
+
+                activator_concentration[row, col] *= activator_remain
+                activator_concentration[row, col] += activator_production[
+                                                     row - 1 if row - 1 >= 0 else 0:row + 2,
+                                                     col - 1 if col - 1 >= 0 else 0:col + 2
+                                                     ].sum()
+
+                if 0 < states[row, col] < excitation_time + refractory_time:
+                    states[row, col] += 1
+                elif states[row, col] == excitation_time + refractory_time:
+                    states[row, col] = 0
+                elif states[row, col] == 0 and activator_concentration[row, col] < critical_value:
+                    states[row, col] = 0
+                elif states[row, col] == 0 and activator_concentration[row, col] >= critical_value:
+                    states[row, col] = 1
+
+        return states, activator_concentration, activator_production
 
     def next_step(self):
         """
         This method calculate the next_step's states
         :return: states
         """
-        for row in range(self.width):
-            for col in range(self.height):
-
-                if 0 < self._states[row, col] <= self.excitation_time:
-                    self.activator_production[row, col] = 1
-                elif self.excitation_time < self._states[row, col] <= self.excitation_time + self.refractory_time or \
-                        self._states[row, col] == 0:
-                    self.activator_production[row, col] = 0
-
-                self.activator_concentration[row, col] *= self.activator_remain
-                self.activator_concentration[row, col] += self.activator_production[
-                                                         row - 1 if row - 1 >= 0 else 0:row + 2,
-                                                         col - 1 if col - 1 >= 0 else 0:col + 2
-                                                         ].sum()
-
-                if 0 < self._states[row, col] < self.excitation_time + self.refractory_time:
-                    self._states[row, col] += 1
-                elif self._states[row, col] == self.excitation_time + self.refractory_time:
-                    self._states[row, col] = 0
-                elif self._states[row, col] == 0 and self.activator_concentration[row, col] < self.critical_value:
-                    self._states[row, col] = 0
-                elif self._states[row, col] == 0 and self.activator_concentration[row, col] >= self.critical_value:
-                    self._states[row, col] = 1
+        self._states, self.activator_concentration, self.activator_production = self.__next_step(self._states,
+                                                                                                 self.activator_production,
+                                                                                                 self.activator_concentration,
+                                                                                                 self.width,
+                                                                                                 self.height,
+                                                                                                 self.excitation_time,
+                                                                                                 self.refractory_time,
+                                                                                                 self.activator_remain,
+                                                                                                 self.critical_value)
 
         return self._states
 
 
 if __name__ == '__main__':
     state = State.create_state_from_file('config/state3.json')
+    state.resize_states(30, 30)
     plt.figure(1)
     plt.imshow(state.states)
     plt.ion()
