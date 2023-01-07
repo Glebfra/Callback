@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 
 class State(object):
-    def __init__(self, height: int = 30, width: int = 27, excitation_time: float = 3, refractory_time: float = 5,
+    def __init__(self, height: int = 30, width: int = 27, excitation_time: int = 3, refractory_time: int = 5,
                  critical_value: float = 3, activator_remain: float = 0.3, states: typing.Iterable = None,
                  pacemakers: typing.Iterable = None) -> None:
         """
