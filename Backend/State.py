@@ -47,6 +47,10 @@ class State(object):
                     states_array[row, col] = 2
         return states_array
 
+    @states.setter
+    def states(self, states):
+        self._states = states
+
     def save_state_to_file(self, filepath):
         properties = {
             'height': self.height,
