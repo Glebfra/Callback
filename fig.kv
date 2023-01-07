@@ -4,96 +4,158 @@
 <TooltipMDCheckbox@MDCheckbox+MDTooltip>
 <TooltipMDSlider@MDSlider+MDTooltip>
 
+
 #:set default_font_name 'TimesNewRomanRegular.ttf'
 
 #:import images_path kivymd.images_path
+<BrushPicker@MDIconButton>:
+
+    icon_size : sp(48)
+    on_press: app.bth_change_color(self)
+
+
+<MDInput@MDTextField>:
+    input_type: 'number'
+    mode: "rectangle"
+    helper_text_mode: "on_focus"
+
+
 
 <Container>:
     orientation:'horizontal'
     size_hint:(1,1)
     spacing:10
     padding:[10]
+
     MDBoxLayout:
-        size_hint:(.7,1)
+        size_hint:(.8,1)
         Drawer:
-            id:Drawer
-            size: root.size
-
+            id: Drawer
 
     MDBoxLayout:
+        size_hint_min_x:225
         spacing:5
-        size_hint:(.3,1)
+        size_hint:(.2,1)
         orientation:'vertical'
         MDCard:
+            size_hint_min_y:175
+            orientation: "vertical"
+            padding: "8dp"
             style: 'elevated'
             radius: 0
             size_hint_x:1
-            size_hint_y:.2
-            MDGridLayout:
-                rows:2
-                cols:3
-                MDIconButton:
-                    text: '0'
-                    icon:'FrontEnd\\Icons\\calm.png'
-                    theme_icon_color: "Custom"
-                    icon_color: [.27, 0, .33, 1]
-                    icon_size : sp(48)
-                    on_press: app.bth_change_color(self)
-                MDIconButton:
-                    text: '1'
-                    icon:'FrontEnd\\Icons\\chill.png'
-                    theme_icon_color: "Custom"
-                    icon_color: [.13, .56, .55, 1]
-                    icon_size : sp(48)
-                    on_press: app.bth_change_color(self)
-                MDIconButton:
-                    text: '2'
-                    icon:'FrontEnd\\Icons\\angry.png'
-                    theme_icon_color: "Custom"
-                    icon_color: [.99, .91, .14, 1]
-                    icon_size : sp(48)
-                    on_press: app.bth_change_color(self)
-        MDCard:
-            style: 'elevated'
-            radius: 0
-            size_hint_x:1
-            size_hint_y:.7
+            size_hint_y:.3
+            MDLabel:
+                text: "Brush Properties"
+                theme_text_color: "Secondary"
+                size_hint_y: None
+                height: self.texture_size[1]
+            MDSeparator:
+                height: "1dp"
             MDBoxLayout:
-                padding:[10]
-                size_hint:(1,1)
                 orientation:'vertical'
-                radius: 0
-                style: 'elevated'
-                line_color:[.1,.1,.1,.1]
-                size_hint_y:.4
-                size_hint_x:1
+                MDBoxLayout:
+                    adaptive_height:True
+                    orientation:'horizontal'
+                    BrushPicker:
+                        text: '0'
+                        icon:'FrontEnd\\Icons\\calm.png'
+                        icon_color: [.27, 0, .33, 1]
+                    BrushPicker:
+                        text: '1'
+                        icon:'FrontEnd\\Icons\\chill.png'
+                        icon_color: [.13, .56, .55, 1]
+                        icon_size : sp(48)
+                    BrushPicker:
+                        text: '7'
+                        icon:'FrontEnd\\Icons\\angry.png'
+                        icon_color: [.99, .91, .14, 1]
                 MDBoxLayout:
                     orientation:'horizontal'
+                    MDIcon:
+                        theme_icon_color: "Custom"
+                        size_hint:(.2,.5)
+                        icon:'resize'
+                    TooltipMDSlider:
+                        tooltip_text:'Pick the size of brush'
+                        size_hint:(.8,.5)
+                        value:1
+                        min:1
+                        max:5
+                MDBoxLayout:
+                    orientation:'horizontal'
+                    MDIcon:
+                        theme_icon_color: "Custom"
+                        size_hint:(.2,.5)
+                        icon:'alpha-p-box'
+                    TooltipMDSlider:
+                        tooltip_text:'Pick the phase of placing cell'
+                        size_hint:(.8,.5)
+                        value:1
+                        min:1
+                        max:5
+
+        MDCard:
+            padding: "4dp"
+            orientation:'vertical'
+            style: 'elevated'
+            radius: 0
+            size_hint_x:1
+            size_hint_y:.5
+            MDLabel:
+                text: "Simulation Properties"
+                theme_text_color: "Secondary"
+                size_hint_y: None
+                height: self.texture_size[1]
+            MDSeparator:
+                height: "1dp"
+            MDScrollView:
+                do_scroll_x:False
+                padding:[20]
+                size_hint:(1,.9)
+                MDBoxLayout:
+                    adaptive_height:True
                     spacing:10
-                    MDTextField:
-                        text: '20'
-                        hint_text: "Rows:"
-                        mode: "rectangle"
-                    MDTextField:
-                        text: '20'
-                        hint_text: "Columns:"
-                        mode: "rectangle"
-                MDTextField:
-                    hint_text: "Refactory Time:"
-                    mode: "rectangle"
-                MDTextField:
-                    hint_text: "Excited Time:"
-                    mode: "rectangle"
-                MDTextField:
-                    hint_text: "Activator remain:"
-                    mode: "rectangle"
-                MDTextField:
-                    hint_text: "Excitation Threshold:"
-                    mode: "rectangle"
-                MDTextField:
-                    size_hint_y:1/5
-                    hint_text: "Time Between Steps:"
-                    mode: "rectangle"
+                    padding:[5,65,5,5]
+                    orientation:'vertical'
+                    radius: 0
+                    style: 'elevated'
+                    line_color:[.1,.1,.1,.1]
+                    MDBoxLayout:
+                        orientation:'horizontal'
+                        spacing:10
+                        MDInput:
+                            input_filter: 'int'
+                            id: row
+                            hint_text: "Rows:"
+                            on_text_validate: app.TF_changeWidth(self)
+                        MDInput:
+                            input_filter: 'int'
+                            id: column
+                            hint_text: "Columns:"
+                            on_text_validate: app.TF_changeHeight(self)
+                    MDInput:
+                        input_filter: 'int'
+                        id: refractory_time
+                        hint_text: "Refactory Time:"
+                        helper_text: "Test"
+                        on_text_validate: app.TF_change_refactory_time(self)
+                    MDInput:
+                        id: excitation_time
+                        hint_text: "Excitation Time:"
+                    MDInput:
+                        input_filter: 'float'
+
+                        id: activator_remain
+                        hint_text: "Activator remain:"
+                    MDInput:
+                        input_filter: 'float'
+                        id: critical_value
+                        hint_text: "Critical Value:"
+                    MDInput:
+                        input_filter: 'float'
+                        id: time_between_steps
+                        hint_text: "Time Between Steps:"
         MDCard:
             radius: 0
             style: 'elevated'
@@ -119,3 +181,4 @@
                     theme_icon_color: "Custom"
                     icon_color: [.2, .8, .2, 1]
                     icon_size : sp(50)
+                    on_release:app.btn_nextStep(self)
