@@ -21,7 +21,7 @@ class State(object):
         :param states: States array
         """
         self.width, self.height = width, height
-        self.states = np.zeros((width, height)) if states is None else np.array(states)
+        self._states = np.zeros((width, height)) if states is None else np.array(states)
         self.pacemakers = np.zeros((width, height)) if pacemakers is None else np.array(pacemakers)
         self.activator_concentration = np.zeros((width, height))
         self.activator_production = np.zeros((width, height))
@@ -36,6 +36,17 @@ class State(object):
             properties = json.load(file)
         return cls(**properties)
 
+    @property
+    def states(self):
+        states_array = self._states.copy()
+        for row in range(self.width):
+            for col in range(self.height):
+                if 0 < states_array[row, col] <= self.excitation_time:
+                    states_array[row, col] = 1
+                elif self.excitation_time < states_array[row, col] <= self.excitation_time + self.refractory_time:
+                    states_array[row, col] = 2
+        return states_array
+
     def save_state_to_file(self, filepath):
         properties = {
             'height': self.height,
@@ -44,7 +55,7 @@ class State(object):
             'excitation_time': self.excitation_time,
             'activator_remain': self.activator_remain,
             'critical_value': self.critical_value,
-            'states': self.states.tolist()
+            'states': self._states.tolist()
         }
         with open(filepath, 'w') as file:
             json.dump(properties, file)
@@ -56,7 +67,7 @@ class State(object):
         # TODO make this method workable
         self.height = height
         self.width = width
-        self.states.reshape((width, height))
+        self._states.reshape((width, height))
         self.activator_production.reshape((width, height))
         self.activator_concentration.reshape((width, height))
 
@@ -68,10 +79,10 @@ class State(object):
         for row in range(self.width):
             for col in range(self.height):
 
-                if 0 < self.states[row, col] <= self.excitation_time:
+                if 0 < self._states[row, col] <= self.excitation_time:
                     self.activator_production[row, col] = 1
-                elif self.excitation_time < self.states[row, col] <= self.excitation_time + self.refractory_time or \
-                        self.states[row, col] == 0:
+                elif self.excitation_time < self._states[row, col] <= self.excitation_time + self.refractory_time or \
+                        self._states[row, col] == 0:
                     self.activator_production[row, col] = 0
 
                 self.activator_concentration[row, col] *= self.activator_remain
@@ -80,20 +91,20 @@ class State(object):
                                                          col - 1 if col - 1 >= 0 else 0:col + 2
                                                          ].sum()
 
-                if 0 < self.states[row, col] < self.excitation_time + self.refractory_time:
-                    self.states[row, col] += 1
-                elif self.states[row, col] == self.excitation_time + self.refractory_time:
-                    self.states[row, col] = 0
-                elif self.states[row, col] == 0 and self.activator_concentration[row, col] < self.critical_value:
-                    self.states[row, col] = 0
-                elif self.states[row, col] == 0 and self.activator_concentration[row, col] >= self.critical_value:
-                    self.states[row, col] = 1
+                if 0 < self._states[row, col] < self.excitation_time + self.refractory_time:
+                    self._states[row, col] += 1
+                elif self._states[row, col] == self.excitation_time + self.refractory_time:
+                    self._states[row, col] = 0
+                elif self._states[row, col] == 0 and self.activator_concentration[row, col] < self.critical_value:
+                    self._states[row, col] = 0
+                elif self._states[row, col] == 0 and self.activator_concentration[row, col] >= self.critical_value:
+                    self._states[row, col] = 1
 
-        return self.states
+        return self._states
 
 
 if __name__ == '__main__':
-    state = State.create_state_from_file('config/state4.json')
+    state = State.create_state_from_file('config/state3.json')
     plt.figure(1)
     plt.imshow(state.states)
     plt.ion()
