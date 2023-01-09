@@ -1,13 +1,16 @@
 
 from kivy.uix.widget import Widget
 from kivy.graphics.instructions import Image
-
+from kivy.graphics import Rectangle
 
 class Drawer(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # Data
         self.figures = None
+
+        self.selection = Rectangle(pos=[0,0], size=[0,0])
+        self.canvas.add(self.selection)
 
         # Maps
         self.textureMap = {0: Image('FrontEnd\\Icons\\calm.png').texture,
@@ -18,9 +21,9 @@ class Drawer(Widget):
         self.iconMap = {0: 'FrontEnd\\Icons\\calm.png',
                         1: 'FrontEnd\\Icons\\chill.png',
                         2: 'FrontEnd\\Icons\\angry.png'}
-        self.colorMap = {0: (.84, .80, .66, 1),
-                         1: (.68, .53, .74, 1),
-                         7: (.81, .53, .45, 1)}
+        self.colorMap = {0: (.84, .80, .66, .5),
+                         1: (.68, .53, .74, .5),
+                         2: (.81, .53, .45, .5)}
 
         # Array properties
         self.rows_count = 20
@@ -41,5 +44,5 @@ class Drawer(Widget):
         self.lastPos = [-1, -1]
 
         # Sim states
-        self.time_between_steps=100
+        self.time_between_steps = 100
 

@@ -4,14 +4,64 @@
 <TooltipMDCheckbox@MDCheckbox+MDTooltip>
 <TooltipMDSlider@MDSlider+MDTooltip>
 
-
+#:import toast kivymd.toast.toast
 #:set default_font_name 'TimesNewRomanRegular.ttf'
 
 #:import images_path kivymd.images_path
 <BrushPicker@MDIconButton>:
-
     icon_size : sp(48)
     on_press: app.bth_change_color(self)
+
+<LoadDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            filters:['*\\*.json']
+            path:'Backend/config'
+            id: filechooser
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+            Button:
+                text: "Load"
+                on_release: root.load(filechooser.path, filechooser.selection)
+
+<SaveDialog>:
+    text_input: text_input
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser
+            on_selection: text_input.text = self.selection and self.selection[0] or ''
+
+        TextInput:
+            id: text_input
+            size_hint_y: None
+            height: 30
+            multiline: False
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Save"
+                on_release: root.save(filechooser.path, text_input.text)
+
+
+
+
+
 
 
 <MDInput@MDTextField>:
@@ -19,6 +69,7 @@
     mode: "rectangle"
     helper_text_mode: "on_error"
     on_text_validate: app.TF_change(self)
+    on_focus: app.TF_change(self)
     required: True
     helper_text: "incorrect input"
     line_color_error: 1, 0, 0, 1
@@ -30,15 +81,17 @@
     padding:[10]
 
     MDBoxLayout:
-
-        size_hint:(.8,1)
+        size_hint:(.85,1)
         Drawer:
             id: Drawer
+            on_touch_down:app.on_touching_down
+            on_touch_move:app.on_touching_down
+            on_touch_up:  app.on_touching_up
 
     MDBoxLayout:
         size_hint_min_x:225
         spacing:5
-        size_hint:(.2,1)
+        size_hint:(.15,1)
         orientation:'vertical'
         MDCard:
             size_hint_min_y:175
@@ -47,7 +100,7 @@
             style: 'elevated'
             radius: 0
             size_hint_x:1
-            size_hint_y:.3
+            size_hint_y:.15
             MDLabel:
                 text: "Brush Properties"
                 theme_text_color: "Secondary"
@@ -114,7 +167,6 @@
             MDSeparator:
                 height: "1dp"
             MDScrollView:
-
                 do_scroll_x:False
                 padding:[20]
                 size_hint:(1,.9)
@@ -159,11 +211,28 @@
                         id: time_between_steps
                         hint_text: "Time Between Steps(ms):"
         MDCard:
+            padding: "4dp"
+            orientation:'horizontal'
+            radius: 0
+            style: 'elevated'
+            line_color:[.1,.1,.1,.1]
+            size_hint_y:.2
+            MDBoxLayout:
+                orientation:'horizontal'
+                MDIconButton:
+                    icon:'folder-plus'
+                    on_release: root.show_load()
+                MDTextField:
+                    text:'Enter/Choose path:'
+                    id:FilePath
+                    on_text:app.loadState(self)
+
+        MDCard:
             radius: 0
             style: 'elevated'
             line_color:[.1,.1,.1,.1]
             size_hint_min_y:50
-            size_hint_y:.1
+            size_hint_y:.07
             size_hint_x:1
             MDBoxLayout:
                 orientation: 'horizontal'
