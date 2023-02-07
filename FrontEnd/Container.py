@@ -3,6 +3,7 @@ from kivymd.uix.floatlayout import MDFloatLayout
 from kivy.properties import ObjectProperty
 from kivy.uix.popup import Popup
 
+from FrontEnd.Drawer import Drawer
 import os
 
 
@@ -31,7 +32,6 @@ class Container(MDBoxLayout):
         self.ids.FilePath.text = str(filename)[2:-2]
         self.dismiss_popup()
 
-
     def save(self, path, filename):
         with open(os.path.join(path, filename), 'w') as stream:
             stream.write(self.text_input.text)
@@ -45,6 +45,12 @@ class LoadDialog(MDFloatLayout):
 
 
 class SaveDialog(MDFloatLayout):
+    save = ObjectProperty(None)
+    text_input = ObjectProperty(None)
+    cancel = ObjectProperty(None)
+
+
+class ConfirmDialog(MDFloatLayout):
     save = ObjectProperty(None)
     text_input = ObjectProperty(None)
     cancel = ObjectProperty(None)

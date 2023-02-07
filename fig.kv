@@ -12,6 +12,8 @@
     icon_size : sp(48)
     on_press: app.bth_change_color(self)
 
+
+
 <LoadDialog>:
     BoxLayout:
         size: root.size
@@ -59,17 +61,12 @@
                 on_release: root.save(filechooser.path, text_input.text)
 
 
-
-
-
-
-
 <MDInput@MDTextField>:
     input_type: 'number'
     mode: "rectangle"
     helper_text_mode: "on_error"
-    on_text_validate: app.TF_change(self)
-    on_focus: app.TF_change(self)
+    on_text_validate: app.textfield_change(self)
+    on_focus: app.textfield_change(self)
     required: True
     helper_text: "incorrect input"
     line_color_error: 1, 0, 0, 1
@@ -81,15 +78,44 @@
     padding:[10]
 
     MDBoxLayout:
+        orientation:'vertical'
         size_hint:(.85,1)
         Drawer:
+            size_hint:(1,.85)
             id: Drawer
-            on_touch_down:app.on_touching_down
-            on_touch_move:app.on_touching_down
-            on_touch_up:  app.on_touching_up
 
     MDBoxLayout:
-        size_hint_min_x:225
+        size_hint_min_x:175
+        spacing:5
+        size_hint:(.15,1)
+        orientation:'vertical'
+        MDCard:
+            spacing:5
+            padding: "4dp"
+            orientation:'vertical'
+            radius: 0
+            style: 'elevated'
+            line_color:[.1,.1,.1,.1]
+            size_hint_y:.4
+            MDTextField:
+                hint_text:'Path:'
+                mode: "rectangle"
+                icon_right:'file-hidden'
+                id:FilePath
+                on_text:app.loadState(self)
+            MDBoxLayout:
+                orientation:'horizontal'
+
+                MDIconButton:
+                    icon:'folder-plus'
+                    on_release: root.show_load()
+        MDCard:
+            size_hint:(1,.6)
+            style: 'elevated'
+            radius: 0
+
+    MDBoxLayout:
+        size_hint_min_x:175
         spacing:5
         size_hint:(.15,1)
         orientation:'vertical'
@@ -111,47 +137,34 @@
             MDBoxLayout:
                 orientation:'vertical'
                 MDBoxLayout:
+                    orientation:'horizontal'
                     adaptive_height:True
-                    orientation:'horizontal'
-                    BrushPicker:
-                        text: '0'
-                        icon:'FrontEnd\\Icons\\calm.png'
-                        icon_color: [.27, 0, .33, 1]
-                    BrushPicker:
-                        text: '1'
-                        icon:'FrontEnd\\Icons\\chill.png'
-                        icon_color: [.13, .56, .55, 1]
-                        icon_size : sp(48)
-                    BrushPicker:
-                        text: '2'
-                        icon:'FrontEnd\\Icons\\angry.png'
-                        icon_color: [.99, .91, .14, 1]
-                MDBoxLayout:
-                    orientation:'horizontal'
-                    MDIcon:
-                        theme_icon_color: "Custom"
-                        size_hint:(.2,.5)
-                        icon:'resize'
-                    TooltipMDSlider:
-                        tooltip_text:'Pick the size of brush'
-                        size_hint:(.8,.5)
-                        value:1
-                        min:1
-                        max:5
-                MDBoxLayout:
-                    orientation:'horizontal'
-                    MDIcon:
-                        theme_icon_color: "Custom"
-                        size_hint:(.2,.5)
-                        icon:'alpha-p-box'
-                    TooltipMDSlider:
+                    spacing:10
+                    padding:[5]
+                    MDInput:
+                        hint_text:'Cell phase'
+                        id:cell_phase
                         input_filter: 'int'
-                        tooltip_text:'Pick the phase of placing cell'
-                        size_hint:(.8,.5)
-                        value:1
-                        min:1
-                        max:5
-                        on_value:app.resizeBrush(self)
+                        icon_right: "brush"
+                    MDInput:
+                        theme_icon_color:'custom'
+                        id:brush_size
+                        hint_text:'Brush size'
+                        input_filter: 'int'
+                        icon_right: "resize"
+                MDBoxLayout:
+                    orientation:'horizontal'
+                    adaptive_height:True
+                    spacing:10
+                    padding:[5]
+                    MDIconButton:
+                        theme_icon_color:'Custom'
+                        icon:'delete'
+                        on_release: app.drawer.clearCanvas()
+
+
+
+
         MDCard:
             padding: "4dp"
             orientation:'vertical'
@@ -172,23 +185,16 @@
                 size_hint:(1,.9)
                 MDBoxLayout:
                     adaptive_height:True
-                    spacing:20
-                    padding:[5,65,5,5]
+                    spacing:10
+                    padding:[5,5,5,5]
                     orientation:'vertical'
                     radius: 0
                     style: 'elevated'
                     line_color:[.1,.1,.1,.1]
-                    MDBoxLayout:
-                        orientation:'horizontal'
-                        spacing:10
-                        MDInput:
-                            input_filter: 'int'
-                            id: row
-                            hint_text: "Rows:"
-                        MDInput:
-                            input_filter: 'int'
-                            id: column
-                            hint_text: "Columns:"
+                    MDInput:
+                        input_filter: 'int'
+                        id: size
+                        hint_text: "Size:"
                     MDInput:
                         input_filter: 'int'
                         id: refractory_time
@@ -211,23 +217,6 @@
                         id: time_between_steps
                         hint_text: "Time Between Steps(ms):"
         MDCard:
-            padding: "4dp"
-            orientation:'horizontal'
-            radius: 0
-            style: 'elevated'
-            line_color:[.1,.1,.1,.1]
-            size_hint_y:.2
-            MDBoxLayout:
-                orientation:'horizontal'
-                MDIconButton:
-                    icon:'folder-plus'
-                    on_release: root.show_load()
-                MDTextField:
-                    text:'Enter/Choose path:'
-                    id:FilePath
-                    on_text:app.loadState(self)
-
-        MDCard:
             radius: 0
             style: 'elevated'
             line_color:[.1,.1,.1,.1]
@@ -244,7 +233,7 @@
                     theme_icon_color: "Custom"
                     icon_color: [.2, .8, .2, 1]
                     icon_size : sp(50)
-                    on_release: app.btn_press(self)
+                    on_release: app.play_button_press(self)
                 MDIconButton:
                     size_hint_x:.5
                     size_hint_y:1
@@ -252,4 +241,4 @@
                     theme_icon_color: "Custom"
                     icon_color: [.2, .8, .2, 1]
                     icon_size : sp(50)
-                    on_release:app.btn_nextStep(self)
+                    on_release:app.next_step_button_press()
