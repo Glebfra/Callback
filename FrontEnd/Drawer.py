@@ -17,7 +17,6 @@ class Drawer(Widget):
         self.map_size: int = map_size
 
         # Binds
-        self.bind(size=self.renderCanvas)
         # Maps
         self.textureMap = {0: Image('FrontEnd\\Icons\\calm.png').texture,
                            1: Image('FrontEnd\\Icons\\chill.png').texture,
@@ -56,10 +55,8 @@ class Drawer(Widget):
                                        texture=self.texture)
         self.drawCount = 0
 
-    def __update_location_properties(self):
+    def update_location_properties(self):
         """Eval the optimal size of tile and leftCorner pos"""
-        print('Updating location properties:'
-              f'Rows\\Cols = {self.map_size, self.map_size}')
         sizeX = self.size[0] / self.map_size
         sizeY = self.size[1] / self.map_size
 
@@ -70,7 +67,6 @@ class Drawer(Widget):
 
         self.left_corner = [10 + (self.size[0] - self.tileSize * self.map_size) / 2,
                             10 + (self.size[1] - self.tileSize * self.map_size) / 2]
-        print(f'Updating finished:Left Corner: {self.left_corner}, Tile Size: {self.tileSize}')
 
     def buf_from_matrix(self):
         buf = np.array([bytes(self.colorMapBuffer[data][(i + j) % 2]) for (i, j), data in np.ndenumerate(self.data)]) \
@@ -78,7 +74,7 @@ class Drawer(Widget):
         buf = b''.join(buf)
         return buf
 
-    def __update_texture(self):
+    def update_texture(self):
         # FIXME: Normal texture creation
         self.texture = Texture.create(size=(self.map_size, self.map_size))
 
@@ -86,56 +82,3 @@ class Drawer(Widget):
         self.texture.mag_filter = 'nearest'
         self.texture.min_filter = 'nearest'
 
-    def renderCanvas(self, *args, **kwargs):
-        self.drawCount += 1
-        print(f'Draw count: {self.drawCount}')
-        self.__update_location_properties()
-        self.__update_texture()
-        self.rectangle.size = [self.tileSize * self.map_size, self.tileSize * self.map_size]
-        self.rectangle.pos = self.left_corner
-        self.rectangle.texture = self.texture
-
-        # with self.canvas:
-        #     Color(1, 1, 1, 1)
-        #
-        #     self.rectangle = Rectangle(size=[self.tileSize * self.map_size,
-        #                                      self.tileSize * self.map_size],
-        #                                texture=self.texture,
-        #                                pos=self.left_corner)
-
-        print(f'Drawing with properties:\n'
-              f'Row\\Cols:{self.map_size, self.map_size}\n'
-              f'Size ={self.rectangle.size}\n'
-              f'Pos = {self.rectangle.pos}\n')
-
-    def _brush_area(self, touch):
-        x, y = touch
-        left = 0 if (x - self.brushSize + 1) < 0 else (x - self.brushSize + 1)
-        right = self.width if (x + self.brushSize) > self.width else (x + self.brushSize)
-        up = self.height if (y + self.brushSize) > self.height else (y + self.brushSize)
-        down = 0 if (y - self.brushSize + 1) < 0 else (y - self.brushSize + 1)
-        self.data[down:up, left:right] = self.brushColor
-
-    def on_touch_down(self, touch):
-        self.pressed = True
-
-    def on_touch_up(self, touch):
-        self.pressed = False
-        self.lastPos = [-1, -1]
-
-    def on_touch_move(self, touch):
-        if [0, 0] > [touch.x, touch.y] > self.size:
-            return
-        i: int = int((touch.x - self.left_corner[0]) / self.tileSize)
-        j: int = int((touch.y - self.left_corner[1]) / self.tileSize)
-        if [i, j] == self.touch:
-            return
-        self.__update_location_properties()
-        self.touch = [i, j]
-        print(f'TileCords:{i}, {j}')
-        self._brush_area([i, j])
-        self.renderCanvas()
-
-    def clearCanvas(self):
-        self.data = np.zeros((self.map_size, self.map_size))
-        self.renderCanvas()

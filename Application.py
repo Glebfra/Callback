@@ -11,8 +11,9 @@ from kivy.properties import ListProperty
 from threading import Thread
 from time import sleep
 from time import perf_counter
+from kivy.uix.label import Label
 
-from Backend.State import State
+from Backend.Calculations import Calculations
 from FrontEnd.Container import Container, LoadDialog, SaveDialog, ConfirmDialog
 from FrontEnd.Drawer import Drawer
 from kivy.graphics.texture import Texture
@@ -30,8 +31,7 @@ class MyApp(MDApp):
     Factory.register('ConfirmDialog', cls=ConfirmDialog)
 
 
-    def __init__(self, size=32, excitation_time=3, refractory_time=5, critical_value=1,
-                 activator_remain=0.55, **kwargs):
+    def __init__(self, size=32, h=3, g=0.4, refraction_time=7, arousal_time=5, background_logic=1, **kwargs):
         super().__init__(**kwargs)
 
         Builder.load_file('fig.kv')
@@ -41,13 +41,18 @@ class MyApp(MDApp):
         self.drawer.map_size = size
         self.drawer.data = np.zeros((size,size))
 
-        self.state = State(width=size,
-                           height=size,
-                           excitation_time=excitation_time,
-                           refractory_time=refractory_time,
-                           critical_value=critical_value,
-                           activator_remain=activator_remain
-                           )
+        self.drawer.bind(on_touch_down=self.on_touching_down)
+        self.drawer.bind(on_touch_up=self.on_touching_up)
+        self.drawer.bind(on_touch_move=self.on_touching_move)
+        self.drawer.bind(size=self.renderCanvas)
+
+        self.calculations = Calculations(number_of_partitions=size,
+                                         h=h,
+                                         g=g,
+                                         refraction_time=refraction_time,
+                                         arousal_time=arousal_time,
+                                         background_logic=1,
+                                         )
 
     def build(self):
         self.updateFields()
@@ -87,36 +92,36 @@ class MyApp(MDApp):
         if ins == IDS.size:
             print('changing map size')
             if not (CANVAS_MIN_SIZE <= value <= CANVAS_MAX_SIZE):
-                ins.text = str(self.state.width)
+                ins.text = str(self.calculations.number_of_partitions)
                 return
-            self.state.resize_states(value, value)
-            self.drawer.data = self.state.states
-            self.drawer.map_size = self.state.width
-            self.drawer.renderCanvas()
+            self.calculations.changing_the_size_of_matrices(value)
+            self.drawer.data = self.calculations.matrix_of_states
+            self.drawer.map_size = self.calculations.number_of_partitions
+            self.renderCanvas()
 
         elif ins == IDS.refractory_time:
             if value <= 0:
-                ins.text = str(self.state.refractory_time)
+                ins.text = str(self.calculations.refraction_time)
                 return
-            self.state.refractory_time = value
+            self.calculations.refraction_time = value
 
         elif ins == IDS.excitation_time:
             if value <= 0:
-                ins.text = str(self.state.excitation_time)
+                ins.text = str(self.calculations.arousal_time)
                 return
-            self.state.excitation_time = value
+            self.calculations.arousal_time = value
 
         elif ins == IDS.activator_remain:
             if not (0 <= value <= 1):
-                ins.text = str(self.state.activator_remain)
+                ins.text = str(self.calculations.g)
                 return
-            self.state.activator_remain = value
+            self.calculations.g = value
 
         elif ins == IDS.critical_value:
             if value <= 1:
-                ins.text = str(self.state.critical_value)
+                ins.text = str(self.calculations.h)
                 return
-            self.state.critical_value = value
+            self.calculations.h = value
 
         elif ins == IDS.time_between_steps:
             if value < 0:
@@ -136,7 +141,7 @@ class MyApp(MDApp):
         else:
             print('Warning:Cant find the id')
 
-    def loadState(self, ins):
+    def loadState(self, ins):#FIXME: Чини
         try:
             ins.line_color_normal = (0, 0, 0, 0.38)
             self.state = self.state.create_state_from_file(ins.text)
@@ -150,13 +155,13 @@ class MyApp(MDApp):
             ins.line_color_normal = (1, 0, 0, 1)
 
     def updateFields(self):
-        self.container.ids.refractory_time.text = str(self.state.refractory_time)
-        self.container.ids.excitation_time.text = str(self.state.excitation_time)
-        self.container.ids.activator_remain.text = str(self.state.activator_remain)
-        self.container.ids.critical_value.text = str(self.state.critical_value)
+        self.container.ids.refractory_time.text = str(self.calculations.refraction_time)
+        self.container.ids.excitation_time.text = str(self.calculations.arousal_time)
+        self.container.ids.activator_remain.text = str(self.calculations.g)
+        self.container.ids.critical_value.text = str(self.calculations.h)
         self.container.ids.time_between_steps.text = str(self.drawer.time_between_steps)
 
-        self.container.ids.size.text = str(self.state.width)
+        self.container.ids.size.text = str(self.calculations.number_of_partitions)
 
     def play_button_press(self,ins):
         if ins.icon == 'play':
@@ -170,16 +175,77 @@ class MyApp(MDApp):
 
     def next_step_button_press(self):
         print('step')
-        self.state.states = self.drawer.data
-        self.state.next_step()
-        self.drawer.data = self.state.states
-        self.drawer.renderCanvas()
-        np.set_printoptions(threshold=sys.maxsize)
-        print(self.drawer.data)
+        self.calculations.calculation_step()
+        self.drawer.data = self.calculations.matrix_of_states
+        self.renderCanvas()
 
     def worker(self, period):
-        self.state.states = self.drawer.data
-        self.state.next_step()
-        self.drawer.data = self.state.states
-        self.drawer.renderCanvas()
-        print(f"FPS:{1 / period}")
+        self.calculations.calculation_step()
+        self.drawer.data = self.calculations.matrix_of_states
+        self.renderCanvas()
+
+
+    def renderCanvas(self, *args, **kwargs):
+        self.drawer.update_location_properties()
+        self.drawer.update_texture()
+        self.drawer.rectangle.size = [self.drawer.tileSize * self.drawer.map_size,
+                                      self.drawer.tileSize * self.drawer.map_size]
+        self.drawer.rectangle.pos = self.drawer.left_corner
+        self.drawer.rectangle.texture = self.drawer.texture
+
+        my_label = Label()
+        my_label.text = '123'
+        my_label.color = (0,0,0)
+        my_label._label.refresh()
+
+        my_label._label.texture.mag_filter = 'nearest'
+        my_label._label.texture.min_filter = 'nearest'
+        print()
+        with self.drawer.canvas:
+            Color(1,1,1,1)
+            Rectangle(size=(self.drawer.tileSize,my_label._label.texture.size[1]/my_label._label.texture.size[0]*self.drawer.tileSize),
+                      pos=(self.drawer.tileSize*3+self.drawer.left_corner[0],
+                           self.drawer.tileSize*10+self.drawer.left_corner[1]),
+                      texture=my_label._label.texture)
+
+    def brush_area(self, touch):
+        x, y = touch
+        left = 0 if (x - self.drawer.brushSize + 1) < 0 else (x - self.drawer.brushSize + 1)
+        right = self.drawer.map_size if (x + self.drawer.brushSize) > self.drawer.map_size else (x + self.drawer.brushSize)
+        up = self.drawer.map_size if (y + self.drawer.brushSize) > self.drawer.map_size else (y + self.drawer.brushSize)
+        down = 0 if (y - self.drawer.brushSize + 1) < 0 else (y - self.drawer.brushSize + 1)
+        self.drawer.data[down:up, left:right] = self.drawer.brushColor
+        self.calculations.phase_matrix[down:up, left:right] = self.drawer.brushColor
+        self.calculations.updateCalcs()
+
+    def on_touching_down(self, touch, ins):
+        self.pressed = True
+
+    def on_touching_up(self, touch, ins):
+        self.pressed = False
+        self.lastPos = [-1, -1]
+
+    def on_touching_move(self, ins, touch):
+        print(f'TouchX,Y:{touch.x, touch.y}')
+        if [0, 0] > [touch.x, touch.y] > self.size:
+            return
+        i: int = int((touch.x - self.drawer.left_corner[0]) / self.drawer.tileSize)
+        j: int = int((touch.y - self.drawer.left_corner[1]) / self.drawer.tileSize)
+        if [i, j] == self.drawer.touch:
+            return
+        self.drawer.update_location_properties()
+        self.drawer.touch = [i, j]
+        print(f'TileCords:{i}, {j}')
+        self.brush_area([i, j])
+        self.renderCanvas()
+
+    def clearCanvas(self):
+        self.drawer.data = np.zeros((self.calculations.number_of_partitions, self.calculations.number_of_partitions))
+        self.calculations.matrix_of_states = np.zeros((self.calculations.number_of_partitions, self.calculations.number_of_partitions))  # Матрица состояний
+        self.calculations.phase_matrix = np.zeros((self.calculations.number_of_partitions, self.calculations.number_of_partitions))  # Матрица фаз
+        self.calculations.production_matrix = np.zeros((self.calculations.number_of_partitions, self.calculations.number_of_partitions))  # Матр производства
+        self.calculations.concentration_matrix = np.zeros((self.calculations.number_of_partitions, self.calculations.number_of_partitions))  # Матр конц
+        self.calculations.matrix_of_periods = np.zeros((self.calculations.number_of_partitions, self.calculations.number_of_partitions))  # Матр периодов
+        self.calculations.time_matrix = np.zeros((self.calculations.number_of_partitions, self.calculations.number_of_partitions))  # Матр времени
+        self.renderCanvas()
+

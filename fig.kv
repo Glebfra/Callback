@@ -80,6 +80,9 @@
     MDBoxLayout:
         orientation:'vertical'
         size_hint:(.85,1)
+        size_hint_min_x: root.height
+        size_hint: None, 1
+        width: root.height
         Drawer:
             size_hint:(1,.85)
             id: Drawer
@@ -160,7 +163,7 @@
                     MDIconButton:
                         theme_icon_color:'Custom'
                         icon:'delete'
-                        on_release: app.drawer.clearCanvas()
+                        on_release: app.clearCanvas()
 
 
 
