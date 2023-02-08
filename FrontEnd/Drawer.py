@@ -8,9 +8,6 @@ from kivy.graphics import Color
 import numpy as np
 import sys
 
-from Decorators import Debugger
-
-
 class Drawer(Widget):
     def __init__(self, map_size: int = 32, **kwargs):
         super().__init__(**kwargs)

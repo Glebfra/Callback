@@ -67,7 +67,6 @@ class MyApp(MDApp):
     def bth_change_color(self, instance):
         self.drawer.brushColor = int(instance.text)
         self.drawer.oldPos = [-1, -1]
-        print(f'color changed to {self.drawer.brushColor}')
         self.drawer.lastPos = [-1, -1]
         with self.drawer.canvas:
             color = self.drawer.colorMap[self.drawer.brushColor]
@@ -90,7 +89,6 @@ class MyApp(MDApp):
         ins.line_color_normal = (0, 0, 0, 0.38)
         IDS = self.container.ids
         if ins == IDS.size:
-            print('changing map size')
             if not (CANVAS_MIN_SIZE <= value <= CANVAS_MAX_SIZE):
                 ins.text = str(self.calculations.number_of_partitions)
                 return
@@ -118,7 +116,7 @@ class MyApp(MDApp):
             self.calculations.g = value
 
         elif ins == IDS.critical_value:
-            if value <= 1:
+            if value < 0:
                 ins.text = str(self.calculations.h)
                 return
             self.calculations.h = value
@@ -138,8 +136,6 @@ class MyApp(MDApp):
                 ins.text = str(self.drawer.brushColor)
                 return
             self.drawer.brushColor = value
-        else:
-            print('Warning:Cant find the id')
 
     def loadState(self, ins):#FIXME: Чини
         try:
@@ -174,7 +170,6 @@ class MyApp(MDApp):
             Clock.unschedule(self.loopEvent)
 
     def next_step_button_press(self):
-        print('step')
         self.calculations.calculation_step()
         self.drawer.data = self.calculations.matrix_of_states
         self.renderCanvas()
@@ -200,7 +195,6 @@ class MyApp(MDApp):
 
         my_label._label.texture.mag_filter = 'nearest'
         my_label._label.texture.min_filter = 'nearest'
-        print()
         with self.drawer.canvas:
             Color(1,1,1,1)
             Rectangle(size=(self.drawer.tileSize,my_label._label.texture.size[1]/my_label._label.texture.size[0]*self.drawer.tileSize),
@@ -226,7 +220,6 @@ class MyApp(MDApp):
         self.lastPos = [-1, -1]
 
     def on_touching_move(self, ins, touch):
-        print(f'TouchX,Y:{touch.x, touch.y}')
         if [0, 0] > [touch.x, touch.y] > self.size:
             return
         i: int = int((touch.x - self.drawer.left_corner[0]) / self.drawer.tileSize)
@@ -235,7 +228,6 @@ class MyApp(MDApp):
             return
         self.drawer.update_location_properties()
         self.drawer.touch = [i, j]
-        print(f'TileCords:{i}, {j}')
         self.brush_area([i, j])
         self.renderCanvas()
 
