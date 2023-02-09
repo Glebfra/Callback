@@ -8,13 +8,17 @@ from kivy.graphics import Color
 import numpy as np
 import sys
 
+
 class Drawer(Widget):
     def __init__(self, map_size: int = 32, **kwargs):
         super().__init__(**kwargs)
         self.map_size: int = map_size
 
+        self.bind(size=self.on_resize)
+
         # Binds
         # Maps
+        self.period = 2
         self.textureMap = {0: Image('FrontEnd\\Icons\\calm.png').texture,
                            1: Image('FrontEnd\\Icons\\chill.png').texture,
                            2: Image('FrontEnd\\Icons\\angry.png').texture}
@@ -28,10 +32,10 @@ class Drawer(Widget):
         self.colorMapBuffer = {0: [(200, 200, 200), (220, 220, 220)],
                                2: [(174, 136, 188), (184, 146, 198)],
                                1: [(207, 134, 115), (217, 144, 125)]}
-
+        self.peacemakers = {}
         # Brush Properties
         self.brushColor = 1
-        self.brushSize = 4
+        self.brushSize = 1
         self.tileSize = 0
         self.touch = [-1, -1]
 
@@ -71,6 +75,21 @@ class Drawer(Widget):
         buf = b''.join(buf)
         return buf
 
+    def on_resize(self, *args):
+        self.update_location_properties()
+        self.update_texture()
+        self.rectangle.size = [self.tileSize * self.map_size,
+                               self.tileSize * self.map_size]
+        self.rectangle.pos = self.left_corner
+
+        for key, value in self.peacemakers.items():
+            if value:
+                self.peacemakers[key].size = (self.peacemakers[key].texture.size[0] /
+                                              self.peacemakers[key].texture.size[
+                                                  1] * self.tileSize, self.tileSize)
+                self.peacemakers[key].pos = (self.tileSize * key[1] + self.left_corner[0],
+                                             self.tileSize * key[0] + self.left_corner[1])
+
     def update_texture(self):
         # FIXME: Normal texture creation
         self.texture = Texture.create(size=(self.map_size, self.map_size))
@@ -78,4 +97,3 @@ class Drawer(Widget):
         self.texture.blit_buffer(self.buf_from_matrix(), colorfmt='rgb', bufferfmt='ubyte')
         self.texture.mag_filter = 'nearest'
         self.texture.min_filter = 'nearest'
-
