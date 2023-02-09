@@ -12,6 +12,7 @@ from threading import Thread
 from time import sleep
 from time import perf_counter
 from kivy.uix.label import Label
+from kivy.uix.popup import Popup
 
 from Backend.Calculations import Calculations
 from FrontEnd.Container import Container, LoadDialog, SaveDialog
@@ -57,7 +58,7 @@ class MyApp(MDApp):
                                          )
         self.renderCanvas()
         self.drawer.on_resize()
-        Window.size = (1100,600)
+        Window.size = (1100,700)
 
     def open_settings(self, *largs):
         pass
@@ -75,42 +76,33 @@ class MyApp(MDApp):
         if ins == IDS.brush_plus:
             self.drawer.brushColor += 1
             IDS.cell_phase.text = str(self.drawer.brushColor)
-            print('brush +')
         elif ins == IDS.brush_minus:
             self.drawer.brushColor -= 1
             if self.drawer.brushColor < 0:
                 self.drawer.brushColor = 0
             IDS.cell_phase.text = str(self.drawer.brushColor)
-            print('brush -')
         elif ins == IDS.size_plus:
             self.drawer.brushSize += 1
             IDS.brush_size.text = str(self.drawer.brushSize)
-            print('size +')
         elif ins == IDS.size_minus:
             self.drawer.brushSize -= 1
             if self.drawer.brushSize < 1:
                 self.drawer.brushSize = 1
             IDS.brush_size.text = str(self.drawer.brushSize)
-            print('size -')
         elif ins == IDS.period_plus:
             self.drawer.period += 1
             IDS.period.text = str(self.drawer.period)
-            print('period +')
         elif ins == IDS.period_minus:
             self.drawer.period -= 1
             if self.drawer.brushSize < 1:
                 self.drawer.brushSize = 1
             IDS.period.text = str(self.drawer.period)
-            print('period -')
 
     def bth_change_color(self, instance):
         self.drawer.brushColor = int(instance.text)
         self.drawer.oldPos = [-1, -1]
         self.drawer.lastPos = [-1, -1]
-        with self.drawer.canvas:
-            color = self.drawer.colorMap[self.drawer.brushColor]
-            Color(color[0], color[1], color[2], color[3])
-            self.drawer.selection = Rectangle(pos=[0, 0], size=[0, 0])
+
 
     def resizeBrush(self, instance):
         instance.value = int(instance.value)
@@ -135,6 +127,7 @@ class MyApp(MDApp):
             self.drawer.data = self.calculations.matrix_of_states
             self.drawer.map_size = self.calculations.number_of_partitions
             self.renderCanvas()
+            self.drawer.on_resize()
 
         elif ins == IDS.refractory_time:
             if value <= 0:
@@ -184,15 +177,20 @@ class MyApp(MDApp):
         return Calculations(**properties)
 
     def loadState(self, ins):  # FIXME: Чини
+        self.clearCanvas()
         ins.line_color_normal = (0, 0, 0, 0.38)
         self.calculations = self.create_state_from_file(ins.text)
-
+        self.calculations.updateCalcs()
         self.updateFields()
         self.container.ids.FilePath.icon_right = 'file-document-check-outline'
         self.drawer.data = self.calculations.matrix_of_states
         self.drawer.map_size = self.calculations.number_of_partitions
+        self.update_piecemaker(self.calculations.matrix_of_periods)
+
         self.renderCanvas()
-        print('loading State')
+        self.drawer.on_resize()
+
+
         # self.container.ids.FilePath.icon_right = 'file-document-remove-outline'
         # ins.line_color_normal = (1, 0, 0, 1)
 
@@ -204,7 +202,8 @@ class MyApp(MDApp):
                   'arousal_time': self.calculations.arousal_time,
                   'background_logic': self.calculations.background_logic,
                   'logic_of_boundary_conditions': self.calculations.logic_of_boundary_conditions,
-                  'matrix_of_states': self.calculations.matrix_of_states.tolist()
+                  'matrix_of_states': self.calculations.matrix_of_states.astype(int).tolist(),
+                  'matrix_of_periods':self.calculations.matrix_of_periods.astype(int).tolist()
                   }
         with open(f'{os.path.join(path, filename)}.json', 'w') as stream:
             json.dump(output, stream)
@@ -234,10 +233,10 @@ class MyApp(MDApp):
             Clock.unschedule(self.loopEvent)
 
     def next_step_button_press(self):
-        print(self.container.size)
         self.calculations.calculation_step()
         self.drawer.data = self.calculations.matrix_of_states
         self.renderCanvas()
+        print(Window.size)
 
     def worker(self, period):
         self.calculations.calculation_step()
@@ -269,8 +268,6 @@ class MyApp(MDApp):
                                                             pos=(self.drawer.tileSize * j + self.drawer.left_corner[0],
                                                                  self.drawer.tileSize * i + self.drawer.left_corner[1]),
                                                             texture=label._label.texture)
-                print(f"Create text with size:{self.drawer.peacemakers[(i, j)].size}"
-                      f"pos:{self.drawer.peacemakers[(i, j)].pos}")
 
     def renderCanvas(self, *args, **kwargs):
         self.drawer.update_location_properties()
@@ -317,7 +314,6 @@ class MyApp(MDApp):
         self.lastPos = [-1, -1]
 
     def on_touching_move(self, ins, touch):
-        print(touch.button)
         if [0, 0] > [touch.x, touch.y] > self.size:
             return
         i: int = int((touch.x - self.drawer.left_corner[0]) / self.drawer.tileSize)
@@ -342,6 +338,8 @@ class MyApp(MDApp):
             (self.calculations.number_of_partitions, self.calculations.number_of_partitions))  # Матр времени
         for key,value in self.drawer.peacemakers.items():
             self.drawer.peacemakers[key].size = (0, 0)
+        for key in self.drawer.peacemakers:
+            self.drawer.canvas.remove(self.drawer.peacemakers[key])
         self.drawer.peacemakers = {}
         self.drawer.on_resize()
         self.renderCanvas()
@@ -351,3 +349,23 @@ class MyApp(MDApp):
         IDS = self.container.ids
         if ins == IDS.moore:
             IDS.drop_item.text = "Moore background"
+
+
+    def update_piecemaker(self, arr):
+
+        for i in range(self.drawer.map_size):
+            for j in range(self.drawer.map_size):
+                if self.calculations.matrix_of_periods[i,j]:
+                    self.create_peacemaker(i,j,arr[i,j])
+
+    def load(self, path, filename):
+        self.container.ids.FilePath.text = str(filename)[2:-2]
+        self._popup.dismiss()
+        self.loadState(self.container.ids.FilePath)
+
+    def show_load(self):
+        print('Callback')
+        content = LoadDialog(load=self.load, cancel=self.container.dismiss_popup)
+        self._popup = Popup(title="Load file", content=content,
+                            size_hint=(0.9, 0.9))
+        self._popup.open()

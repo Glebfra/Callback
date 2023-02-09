@@ -11,8 +11,9 @@ class Calculations:
                  refraction_time=7,
                  arousal_time=5,
                  background_logic=1,
-                 logic_of_boundary_conditions=1,
+                 logic_of_boundary_conditions=0,
                  matrix_of_states=[],
+                 matrix_of_periods=[],
                  **kwargs):
         # Инициализация параметров системы
         self.number_of_partitions = number_of_partitions  # Количество разбиений вдоль одной оси
@@ -29,10 +30,16 @@ class Calculations:
             self.matrix_of_states = np.zeros((self.number_of_partitions, self.number_of_partitions))
         else:
             self.matrix_of_states = np.array(matrix_of_states)  # Матрица состояний
+
+        if not matrix_of_periods:
+            self.matrix_of_periods = np.zeros((self.number_of_partitions, self.number_of_partitions))
+        else:
+            self.matrix_of_periods = np.array(matrix_of_periods)  # Матрица состояний
+
         self.phase_matrix = np.zeros((self.number_of_partitions, self.number_of_partitions))  # Матрица фаз
         self.production_matrix = np.zeros((self.number_of_partitions, self.number_of_partitions))  # Матр производства
         self.concentration_matrix = np.zeros((self.number_of_partitions, self.number_of_partitions))  # Матр конц
-        self.matrix_of_periods = np.zeros((self.number_of_partitions, self.number_of_partitions))  # Матр периодов
+
         self.time_matrix = np.zeros((self.number_of_partitions, self.number_of_partitions))  # Матр времени
 
     @staticmethod

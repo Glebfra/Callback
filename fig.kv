@@ -33,7 +33,7 @@
                 on_release: root.cancel()
             Button:
                 text: "Load"
-                on_release: root.load(filechooser.path, filechooser.selection)
+                on_release: app.load(filechooser.path, filechooser.selection)
 
 <SaveDialog>:
     text_input: text_input
@@ -90,85 +90,18 @@
             id: Drawer
 
     MDBoxLayout:
-        size_hint_min_x:175
+        size_hint_min_x:350
         spacing:5
         size_hint:(.15,1)
         orientation:'vertical'
         MDCard:
-            size_hint_y:.2
-            spacing:5
-            padding: "4dp"
-            orientation:'vertical'
-            radius: 0
-            style: 'elevated'
-            line_color:[.1,.1,.1,.1]
-            MDTextField:
-                size_hint_min_x:100
-                hint_text:'Path:'
-                mode: "rectangle"
-                icon_right:'file-hidden'
-                id:FilePath
-                on_text:app.loadState(self)
-            MDBoxLayout:
-                orientation:'horizontal'
-                MDRectangleFlatIconButton:
-                    text:"Load"
-                    markup: True
-                    icon:'file-upload-outline'
-                    on_release: root.show_load()
-                MDRectangleFlatIconButton:
-                    text:"Save"
-                    markup: True
-                    icon:'file-upload-outline'
-                    on_release: root.show_save()
-                MDRectangleFlatIconButton:
-                    text:"Clear All"
-                    markup: True
-                    icon:'delete'
-                    on_release: app.clearCanvas()
-        MDCard:
-            size_hint:(1,.6)
-            style: 'elevated'
-            radius: 0
-            MDDropDownItem:
-                radius:0
-                id: drop_item
-                pos_hint: {'center_x': .5, 'center_y': .5}
-                text: 'Item 0'
-                on_release: root.menu.open()
-            MDBoxLayout:
-                orientation:'horizontal'
-                MDInput:
-                    hint_text:'Period'
-                    id:period
-                    input_filter: 'int'
-                    icon_right: "brush"
-                MDBoxLayout:
-                    orientation:'vertical'
-                    MDIconButton:
-                        id: period_plus
-                        icon:'plus'
-                        icon_size:10
-                        on_release: app.button_press(self)
-                    MDIconButton:
-                        id: period_minus
-                        icon:'minus'
-                        icon_size:10
-                        on_release: app.button_press(self)
-
-    MDBoxLayout:
-        size_hint_min_x:175
-        spacing:5
-        size_hint:(.15,1)
-        orientation:'vertical'
-        MDCard:
-            size_hint_min_y:175
+            size_hint_min_y:250
             orientation: "vertical"
             padding: "8dp"
             style: 'elevated'
             radius: 0
             size_hint_x:1
-            size_hint_y:.15
+            size_hint_y:.2
             MDLabel:
                 text: "Brush Properties"
                 theme_text_color: "Secondary"
@@ -179,45 +112,65 @@
             MDBoxLayout:
                 orientation:'vertical'
                 MDBoxLayout:
-                    orientation:'horizontal'
-                    adaptive_height:True
-                    spacing:10
-                    padding:[5]
-                    MDInput:
-                        hint_text:'Cell State'
-                        id:cell_phase
-                        input_filter: 'int'
-                        icon_right: "brush"
+                    orientation:'vertical'
+                    spacing:50
+                    padding:[5, 50, 5, 5]
+
                     MDBoxLayout:
-                        orientation:'vertical'
+                        orientation:'horizontal'
+                        MDInput:
+                            hint_text:'Cell State'
+                            id:cell_phase
+                            input_filter: 'int'
+                            icon_right: "brush"
                         MDIconButton:
                             id: brush_plus
                             icon:'plus'
-                            icon_size:10
+                            icon_size:16
                             on_release: app.button_press(self)
                         MDIconButton:
                             id: brush_minus
                             icon:'minus'
-                            icon_size:10
+                            icon_size:16
                             on_release: app.button_press(self)
-                    MDInput:
-                        theme_icon_color:'custom'
-                        id:brush_size
-                        hint_text:'Brush size'
-                        input_filter: 'int'
-                        icon_right: "resize"
-                        on_text:app.textfield_change(self)
+
                     MDBoxLayout:
-                        orientation:'vertical'
+                        orientation:'horizontal'
+                        MDInput:
+                            theme_icon_color:'custom'
+                            id:brush_size
+                            icon_size:16
+                            hint_text:'Brush size'
+                            input_filter: 'int'
+                            icon_right: "resize"
+                            on_text:app.textfield_change(self)
                         MDIconButton:
                             id: size_plus
                             icon:'plus'
-                            icon_size:10
+                            icon_size:16
                             on_release: app.button_press(self)
                         MDIconButton:
                             id: size_minus
                             icon:'minus'
-                            icon_size:10
+                            icon_size:16
+                            on_release: app.button_press(self)
+
+                    MDBoxLayout:
+                        orientation:'horizontal'
+                        MDInput:
+                            hint_text:'Period'
+                            id:period
+                            input_filter: 'int'
+                            icon_right: "brush"
+                        MDIconButton:
+                            id: period_plus
+                            icon:'plus'
+                            icon_size:16
+                            on_release: app.button_press(self)
+                        MDIconButton:
+                            id: period_minus
+                            icon:'minus'
+                            icon_size:16
                             on_release: app.button_press(self)
 
                 MDBoxLayout:
@@ -278,6 +231,41 @@
                         input_filter: 'float'
                         id: time_between_steps
                         hint_text: "Time Between Steps(ms):"
+        MDCard:
+            size_hint_y:.2
+            spacing:5
+            padding: "4dp"
+            orientation:'vertical'
+            size_hint_min_y:125
+            radius: 0
+            style: 'elevated'
+            line_color:[.1,.1,.1,.1]
+            MDTextField:
+                size_hint_min_x:100
+                hint_text:'Path:'
+                mode: "rectangle"
+                icon_right:'file-hidden'
+                id:FilePath
+                on_text:app.loadState(self)
+            MDBoxLayout:
+                spacing:5
+                padding:[25, 0, 25, 0]
+                orientation:'horizontal'
+                MDRectangleFlatIconButton:
+                    size_hint_x:.25
+                    text:"Load"
+                    icon:'file-upload-outline'
+                    on_release: app.show_load()
+                MDRectangleFlatIconButton:
+                    size_hint_x:.25
+                    text:"Save"
+                    icon:'file-upload-outline'
+                    on_release: root.show_save()
+                MDRectangleFlatIconButton:
+                    size_hint_x:.25
+                    text:"Clear"
+                    icon:'delete'
+                    on_release: app.clearCanvas()
         MDCard:
             radius: 0
             style: 'elevated'

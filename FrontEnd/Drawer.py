@@ -81,7 +81,6 @@ class Drawer(Widget):
         self.rectangle.size = [self.tileSize * self.map_size,
                                self.tileSize * self.map_size]
         self.rectangle.pos = self.left_corner
-
         for key, value in self.peacemakers.items():
             if value:
                 self.peacemakers[key].size = (self.peacemakers[key].texture.size[0] /
@@ -91,9 +90,10 @@ class Drawer(Widget):
                                              self.tileSize * key[0] + self.left_corner[1])
 
     def update_texture(self):
-        # FIXME: Normal texture creation
         self.texture = Texture.create(size=(self.map_size, self.map_size))
 
         self.texture.blit_buffer(self.buf_from_matrix(), colorfmt='rgb', bufferfmt='ubyte')
         self.texture.mag_filter = 'nearest'
         self.texture.min_filter = 'nearest'
+
+
