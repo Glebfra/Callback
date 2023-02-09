@@ -58,10 +58,11 @@ class MyApp(MDApp):
                                          )
         self.renderCanvas()
         self.drawer.on_resize()
-        Window.size = (1100,700)
+        Window.size = (1100, 700)
 
     def open_settings(self, *largs):
         pass
+
     def build(self):
         self.updateFields()
 
@@ -75,6 +76,8 @@ class MyApp(MDApp):
         IDS = self.container.ids
         if ins == IDS.brush_plus:
             self.drawer.brushColor += 1
+            if self.drawer.brushColor > 2:
+                self.drawer.brushColor = 2
             IDS.cell_phase.text = str(self.drawer.brushColor)
         elif ins == IDS.brush_minus:
             self.drawer.brushColor -= 1
@@ -94,8 +97,8 @@ class MyApp(MDApp):
             IDS.period.text = str(self.drawer.period)
         elif ins == IDS.period_minus:
             self.drawer.period -= 1
-            if self.drawer.brushSize < 1:
-                self.drawer.brushSize = 1
+            if self.drawer.period < 0:
+                self.drawer.period = 0
             IDS.period.text = str(self.drawer.period)
 
     def bth_change_color(self, instance):
@@ -103,23 +106,31 @@ class MyApp(MDApp):
         self.drawer.oldPos = [-1, -1]
         self.drawer.lastPos = [-1, -1]
 
-
     def resizeBrush(self, instance):
         instance.value = int(instance.value)
         self.drawer.brushSize = round(instance.value)
 
     def textfield_change(self, ins):
-        if ins.text:
-            try:
-                value = int(ins.text)
-            except:
-                value = float(ins.text)
-        else:
+        if not ins.text:
             ins.line_color_normal = (1, 0, 0, 1)
             return
+        def check():
+            try:
+                value = int(ins.text)
+                return value
+            except:
+                try:
+                    value = float(ins.text)
+                    return value
+                except:
+                    value = -1
+                    return value
+
+
         ins.line_color_normal = (0, 0, 0, 0.38)
         IDS = self.container.ids
         if ins == IDS.size:
+            value = check()
             if not (CANVAS_MIN_SIZE <= value <= CANVAS_MAX_SIZE):
                 ins.text = str(self.calculations.number_of_partitions)
                 return
@@ -130,46 +141,76 @@ class MyApp(MDApp):
             self.drawer.on_resize()
 
         elif ins == IDS.refractory_time:
+            value = check()
             if value <= 0:
                 ins.text = str(self.calculations.refraction_time)
                 return
             self.calculations.refraction_time = value
 
         elif ins == IDS.excitation_time:
+            value = check()
             if value <= 0:
                 ins.text = str(self.calculations.arousal_time)
                 return
             self.calculations.arousal_time = value
 
         elif ins == IDS.activator_remain:
+            value = check()
             if not (0 <= value <= 1):
                 ins.text = str(self.calculations.g)
                 return
             self.calculations.g = value
 
         elif ins == IDS.critical_value:
+            value = check()
             if value < 0:
                 ins.text = str(self.calculations.h)
                 return
             self.calculations.h = value
 
         elif ins == IDS.time_between_steps:
+            value = check()
             if value < 0:
                 ins.text = str(self.drawer.time_between_steps)
                 return
             self.drawer.time_between_steps = value
         elif ins == IDS.brush_size:
-            if value < 0:
+            value = check()
+            if value <= 0:
                 ins.text = str(self.drawer.brushSize)
                 return
             self.drawer.brushSize = value
         elif ins == IDS.cell_phase:
+            value = check()
             if value < 0:
                 ins.text = str(self.drawer.brushColor)
                 return
             self.drawer.brushColor = value
         elif ins == IDS.period:
+            value = check()
+            if value < 0:
+                ins.text = str(self.drawer.brushColor)
+                return
             self.drawer.period = int(ins.text)
+        elif ins == IDS.boundary_conditions:
+            if ins.text == '1':
+                self.calculations.logic_of_boundary_conditions = True
+            if ins.text == '0':
+                self.calculations.logic_of_boundary_conditions = False
+            if ins.text not in ['True', 'False']:
+                ins.text = str(self.calculations.logic_of_boundary_conditions)
+                return
+            self.calculations.logic_of_boundary_conditions = True if ins.text == 'True' else False
+
+        elif ins == IDS.background:
+            if ins.text == '1':
+                self.calculations.background_logic = True
+            if ins.text == '0':
+                self.calculations.background_logic = False
+            if ins.text not in ['Moore', 'von Neumann']:
+                ins.text = 'Moore' if self.calculations.background_logic else 'von Neumann'
+                return
+            self.calculations.logic_of_boundary_conditions = True if ins.text == 'Moore' else False
 
     def create_state_from_file(self, filepath):
         with open(filepath, 'r') as file:
@@ -190,7 +231,6 @@ class MyApp(MDApp):
         self.renderCanvas()
         self.drawer.on_resize()
 
-
         # self.container.ids.FilePath.icon_right = 'file-document-remove-outline'
         # ins.line_color_normal = (1, 0, 0, 1)
 
@@ -203,7 +243,7 @@ class MyApp(MDApp):
                   'background_logic': self.calculations.background_logic,
                   'logic_of_boundary_conditions': self.calculations.logic_of_boundary_conditions,
                   'matrix_of_states': self.calculations.matrix_of_states.astype(int).tolist(),
-                  'matrix_of_periods':self.calculations.matrix_of_periods.astype(int).tolist()
+                  'matrix_of_periods': self.calculations.matrix_of_periods.astype(int).tolist()
                   }
         with open(f'{os.path.join(path, filename)}.json', 'w') as stream:
             json.dump(output, stream)
@@ -254,12 +294,15 @@ class MyApp(MDApp):
         self.calculations.matrix_of_periods[i, j] = period
         if (i, j) in self.drawer.peacemakers:
             self.drawer.peacemakers[(i, j)].texture = label._label.texture
-            self.drawer.peacemakers[(i, j)].size = (label._label.texture.size[0] /
-                                                    label._label.texture.size[
-                                                        1] * self.drawer.tileSize, self.drawer.tileSize)
+            if period:
+                self.drawer.peacemakers[(i, j)].size = (label._label.texture.size[0] /
+                                                        label._label.texture.size[
+                                                            1] * self.drawer.tileSize, self.drawer.tileSize)
+            else:
+                self.drawer.peacemakers[(i, j)].size = (0, 0)
             self.drawer.peacemakers[(i, j)].pos = (self.drawer.tileSize * j + self.drawer.left_corner[0],
                                                    self.drawer.tileSize * i + self.drawer.left_corner[1])
-        else:
+        elif period:
             with self.drawer.canvas:
                 Color(1, 1, 1, 1)
                 self.drawer.peacemakers[(i, j)] = Rectangle(size=(label._label.texture.size[0] /
@@ -288,7 +331,7 @@ class MyApp(MDApp):
         #                    self.drawer.tileSize*10+self.drawer.left_corner[1]),
         #               texture=my_label._label.texture)
 
-    def brush_area(self, touch,button):
+    def brush_area(self, touch, button):
         x, y = touch
         left = 0 if (x - self.drawer.brushSize + 1) < 0 else (x - self.drawer.brushSize + 1)
         right = self.drawer.map_size if (x + self.drawer.brushSize) > self.drawer.map_size else (
@@ -297,8 +340,8 @@ class MyApp(MDApp):
         down = 0 if (y - self.drawer.brushSize + 1) < 0 else (y - self.drawer.brushSize + 1)
 
         if button == 'right':
-            for i in range(left,right):
-                for j in range(down,up):
+            for i in range(left, right):
+                for j in range(down, up):
                     self.create_peacemaker(j, i, self.drawer.period)
         elif button == 'left':
             self.drawer.data[down:up, left:right] = self.drawer.brushColor
@@ -319,7 +362,7 @@ class MyApp(MDApp):
         i: int = int((touch.x - self.drawer.left_corner[0]) / self.drawer.tileSize)
         j: int = int((touch.y - self.drawer.left_corner[1]) / self.drawer.tileSize)
         self.drawer.update_location_properties()
-        self.brush_area([i, j],touch.button)
+        self.brush_area([i, j], touch.button)
         self.renderCanvas()
 
     def clearCanvas(self):
@@ -336,7 +379,7 @@ class MyApp(MDApp):
             (self.calculations.number_of_partitions, self.calculations.number_of_partitions))  # Матр периодов
         self.calculations.time_matrix = np.zeros(
             (self.calculations.number_of_partitions, self.calculations.number_of_partitions))  # Матр времени
-        for key,value in self.drawer.peacemakers.items():
+        for key, value in self.drawer.peacemakers.items():
             self.drawer.peacemakers[key].size = (0, 0)
         for key in self.drawer.peacemakers:
             self.drawer.canvas.remove(self.drawer.peacemakers[key])
@@ -344,28 +387,26 @@ class MyApp(MDApp):
         self.drawer.on_resize()
         self.renderCanvas()
 
-
     def change_background(self, ins):
         IDS = self.container.ids
         if ins == IDS.moore:
             IDS.drop_item.text = "Moore background"
 
-
     def update_piecemaker(self, arr):
 
         for i in range(self.drawer.map_size):
             for j in range(self.drawer.map_size):
-                if self.calculations.matrix_of_periods[i,j]:
-                    self.create_peacemaker(i,j,arr[i,j])
+                if self.calculations.matrix_of_periods[i, j]:
+                    self.create_peacemaker(i, j, arr[i, j])
 
     def load(self, path, filename):
         self.container.ids.FilePath.text = str(filename)[2:-2]
-        self._popup.dismiss()
+        self.container.popup.dismiss()
         self.loadState(self.container.ids.FilePath)
 
     def show_load(self):
         print('Callback')
         content = LoadDialog(load=self.load, cancel=self.container.dismiss_popup)
-        self._popup = Popup(title="Load file", content=content,
-                            size_hint=(0.9, 0.9))
-        self._popup.open()
+        self.container.popup = Popup(title="Load file", content=content,
+                                     size_hint=(0.9, 0.9))
+        self.container.popup.open()

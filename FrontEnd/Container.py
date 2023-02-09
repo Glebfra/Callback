@@ -30,15 +30,15 @@ class Container(MDBoxLayout):
         print(text_item)
 
     def dismiss_popup(self):
-        self._popup.dismiss()
+        self.popup.dismiss()
 
 
 
     def show_save(self):
         content = SaveDialog(save=self.save, cancel=self.dismiss_popup)
-        self._popup = Popup(title="Save file", content=content,
+        self.popup = Popup(title="Save file", content=content,
                             size_hint=(0.9, 0.9))
-        self._popup.open()
+        self.popup.open()
 
 
 

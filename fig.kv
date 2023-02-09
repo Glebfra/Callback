@@ -143,7 +143,7 @@
                             hint_text:'Brush size'
                             input_filter: 'int'
                             icon_right: "resize"
-                            on_text:app.textfield_change(self)
+                            #on_text:app.textfield_change(self)
                         MDIconButton:
                             id: size_plus
                             icon:'plus'
@@ -206,31 +206,72 @@
                     radius: 0
                     style: 'elevated'
                     line_color:[.1,.1,.1,.1]
-                    MDInput:
-                        input_filter: 'int'
-                        id: size
-                        hint_text: "Size:"
-                    MDInput:
-                        input_filter: 'int'
-                        id: refractory_time
-                        hint_text: "Refactory Time:"
-                        helper_text: "Test"
-                    MDInput:
-                        input_filter: 'int'
-                        id: excitation_time
-                        hint_text: "Excitation Time:"
-                    MDInput:
-                        input_filter: 'float'
-                        id: activator_remain
-                        hint_text: "Activator remain:"
-                    MDInput:
-                        input_filter: 'float'
-                        id: critical_value
-                        hint_text: "Critical Value:"
-                    MDInput:
-                        input_filter: 'float'
-                        id: time_between_steps
-                        hint_text: "Time Between Steps(ms):"
+                    MDBoxLayout:
+                        adaptive_height:True
+                        spacing:15
+                        padding:[5,5,5,5]
+                        orientation:'horizontal'
+                        radius: 0
+                        style: 'elevated'
+                        MDInput:
+                            input_filter: 'int'
+                            id: size
+                            hint_text: "Size:"
+                        MDInput:
+                            input_filter: 'float'
+                            id: time_between_steps
+                            hint_text: "Time Between Steps(ms):"
+                    MDBoxLayout:
+                        adaptive_height:True
+                        spacing:15
+                        padding:[5,5,5,5]
+                        orientation:'horizontal'
+                        radius: 0
+                        style: 'elevated'
+                        MDInput:
+                            text: 'Moore'
+                            id: background
+                            hint_text: "Background"
+                            helper_text:'1-Moore, 0-fon Neyman'
+                            helper_text_mode:'on_focus'
+                        MDInput:
+                            text: 'False'
+                            id: boundary_conditions
+                            hint_text: "Periodic boundary:"
+                            helper_text:'1-True, 0-False'
+                            helper_text_mode:'on_focus'
+                    MDBoxLayout:
+                        adaptive_height:True
+                        spacing:15
+                        padding:[5,5,5,5]
+                        orientation:'horizontal'
+                        radius: 0
+                        style: 'elevated'
+                        MDInput:
+                            input_filter: 'int'
+                            id: refractory_time
+                            hint_text: "Refactory Time:"
+                            helper_text: "Test"
+                        MDInput:
+                            input_filter: 'int'
+                            id: excitation_time
+                            hint_text: "Excitation Time:"
+                    MDBoxLayout:
+                        adaptive_height:True
+                        spacing:15
+                        padding:[5,5,5,5]
+                        orientation:'horizontal'
+                        radius: 0
+                        style: 'elevated'
+                        MDInput:
+                            input_filter: 'float'
+                            id: activator_remain
+                            hint_text: "Activator remain:"
+                        MDInput:
+                            input_filter: 'float'
+                            id: critical_value
+                            hint_text: "Critical Value:"
+
         MDCard:
             size_hint_y:.2
             spacing:5
